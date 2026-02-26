@@ -9,12 +9,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import uz.mirmaxsudov.lmsbackend.model.entity.auth.Permission;
+import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
+import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,20 +32,12 @@ public class JwtService {
     @Value("${jwt.refresh.expiration-ms}")
     private Long refreshTokenExpiration;
 
-    public String generateAccessToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, accessTokenExpiration);
+    public String generateAccessToken(User user) {
+        return buildToken(new HashMap<>(), user, accessTokenExpiration);
     }
 
-    public String generateAccessToken(UserDetails details, Long sessionId) {
-        return buildToken(new HashMap<>(), details, accessTokenExpiration, sessionId);
-    }
-
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshTokenExpiration);
-    }
-
-    public String generateRefreshToken(UserDetails userDetails, Long sessionId) {
-        return buildToken(new HashMap<>(), userDetails, refreshTokenExpiration, sessionId);
+    public String generateRefreshToken(User user) {
+        return buildToken(new HashMap<>(), user, refreshTokenExpiration);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -68,27 +65,36 @@ public class JwtService {
                 .getPayload();
     }
 
-    private String buildToken(Map<String, Object> extraClaims, UserDetails details, Long expiration, Long sessionId) {
-        return Jwts
-                .builder()
-                .id(sessionId.toString())
-                .claims(extraClaims)
-                .subject(details.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignKey(), Jwts.SIG.HS512).compact();
-    }
 
-    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    private String buildToken(Map<String, Object> extraClaims, User user, long expiration) {
+        var roles = extractRoles(user);
+        var permissions = extractPermissions(user);
+
+        extraClaims.put("roles", roles);
+        extraClaims.put("permissions", permissions);
+
         return Jwts
                 .builder()
                 .claims(extraClaims)
-                .subject(userDetails.getUsername())
+                .subject(user.getId().toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignKey(), Jwts.SIG.HS512).compact();
+                .signWith(getSignKey(), Jwts.SIG.HS512)
+                .compact();
     }
 
+    private Set<String> extractRoles(User user) {
+        return user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> extractPermissions(User user) {
+        return user.getRoles().stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(Permission::getCode)
+                .collect(Collectors.toSet());
+    }
 
     private SecretKey getSignKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(key));

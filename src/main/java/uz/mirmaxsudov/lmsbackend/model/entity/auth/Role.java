@@ -19,10 +19,7 @@ public class Role extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String name;
     private String description;
-    @ManyToOne
-    @JoinColumn(name = "parent_role_id")
-    private Role parent;
-    @OneToMany
+    @ManyToMany
     @JoinTable(
             name = "role_permissions",
             joinColumns = @JoinColumn(name = "role_id"),

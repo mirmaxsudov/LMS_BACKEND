@@ -6,15 +6,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public record CustomUserDetails(User user) implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+
+        user.getRoles().forEach(role -> {
+            grantedAuthorities.add(
+                    new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
+
+            role.getPermissions().forEach(permission -> {
+                grantedAuthorities.add(
+                        new SimpleGrantedAuthority("PERM_" + permission.getCode().toUpperCase()));
+            });
+        });
+
         return grantedAuthorities;
     }
 
