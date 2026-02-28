@@ -22,15 +22,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserService userService;
 
     @Override
-    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
-        Optional<User> userOptional = userService.getUserByPhoneNumber(phoneNumber);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<User> userOptional = userService.getUserByEmail(email);
 
         if (userOptional.isEmpty())
             throw new UsernameNotFoundException("User not found");
 
-        User user = userOptional.get();
-
-        return new CustomUserDetails(user);
+        return new CustomUserDetails(userOptional.get());
     }
 
     @Bean

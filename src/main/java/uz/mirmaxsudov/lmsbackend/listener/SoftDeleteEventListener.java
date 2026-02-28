@@ -1,6 +1,5 @@
 package uz.mirmaxsudov.lmsbackend.listener;
 
-import org.hibernate.HibernateException;
 import org.hibernate.event.spi.DeleteContext;
 import org.hibernate.event.spi.DeleteEvent;
 import org.hibernate.event.spi.DeleteEventListener;

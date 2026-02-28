@@ -1,10 +1,7 @@
 package uz.mirmaxsudov.lmsbackend.model.entity.auth;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 
 import java.util.HashSet;
@@ -13,16 +10,17 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users",
         indexes = {
-                @Index(columnList = "phoneNumber", unique = true),
+                @Index(columnList = "email", unique = true),
                 @Index(columnList = "id")}
 )
 public class User extends BaseEntity {
     @Column(unique = true, nullable = false)
-    private String phoneNumber;
+    private String email;
     @Column(nullable = false)
     private String password;
     private boolean active = Boolean.TRUE;

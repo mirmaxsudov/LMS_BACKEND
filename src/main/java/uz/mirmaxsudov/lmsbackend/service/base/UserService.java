@@ -5,5 +5,5 @@ import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import java.util.Optional;
 
 public interface UserService {
-    Optional<User> getUserByPhoneNumber(String phoneNumber);
+    Optional<User> getUserByEmail(String email);
 }
