@@ -3,6 +3,8 @@ package uz.mirmaxsudov.lmsbackend.model.entity.auth;
 import jakarta.persistence.*;
 import lombok.*;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
+import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
+import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,13 +21,23 @@ import java.util.Set;
                 @Index(columnList = "id")}
 )
 public class User extends BaseEntity {
+    @Column(nullable = false)
+    private String firstName;
+    @Column(nullable = false)
+    private String lastName;
+    private String middleName;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+    private String brithDate;
+    private String phoneNumber;
     @Column(unique = true, nullable = false)
     private String email;
     @Column(nullable = false)
     private String password;
-    private boolean active = Boolean.TRUE;
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.ACTIVE;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

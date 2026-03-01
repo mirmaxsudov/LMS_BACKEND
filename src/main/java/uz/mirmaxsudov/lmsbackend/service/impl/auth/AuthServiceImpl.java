@@ -4,8 +4,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -64,6 +62,20 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<ApiResponse<AuthMe>> getMe(CustomUserDetails details) {
-        return null;
+        User user = details.user();
+        return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
+                .message("Get me successful")
+                .success(true)
+                .data(AuthMe.builder()
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .middleName(user.getMiddleName())
+                        .email(user.getEmail())
+                        .phoneNumber(user.getPhoneNumber())
+                        .email(user.getEmail())
+                        .gender(user.getGender())
+                        .roles(user.getRoles())
+                        .build())
+                .build());
     }
 }

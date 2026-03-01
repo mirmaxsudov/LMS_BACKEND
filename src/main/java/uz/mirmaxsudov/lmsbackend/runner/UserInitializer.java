@@ -6,7 +6,9 @@
 //import org.springframework.stereotype.Component;
 //import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
 //import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
+//import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
 //import uz.mirmaxsudov.lmsbackend.model.enums.auth.SystemRole;
+//import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 //import uz.mirmaxsudov.lmsbackend.repository.UserRepository;
 //import uz.mirmaxsudov.lmsbackend.repository.auth.RoleRepository;
 //
@@ -35,7 +37,11 @@
 //        User user = userRepository.findByEmail(SUPER_ADMIN_EMAIL)
 //                .orElseGet(() -> User.builder()
 //                        .email(SUPER_ADMIN_EMAIL)
-//                        .active(true)
+//                        .status(UserStatus.ACTIVE)
+//                        .firstName("Abdurahmon")
+//                        .lastName("Mirmaxsudov")
+//                        .gender(Gender.MALE)
+//                        .middleName("MirBahodir")
 //                        .password(passwordEncoder.encode(SUPER_ADMIN_PASSWORD))
 //                        .roles(new HashSet<>())
 //                        .build());
@@ -45,7 +51,8 @@
 //            return;
 //        }
 //
-//        if (user.getId() == null) {
+//        if (user.getStatus() == null) {
+//            user.setStatus(UserStatus.ACTIVE);
 //            userRepository.save(user);
 //        }
 //    }

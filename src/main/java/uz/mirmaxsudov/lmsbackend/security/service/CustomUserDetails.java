@@ -5,6 +5,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
+import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 
 import java.util.*;
 
@@ -57,6 +58,6 @@ public record CustomUserDetails(User user) implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isActive();
+        return user.getStatus().equals(UserStatus.ACTIVE);
     }
 }

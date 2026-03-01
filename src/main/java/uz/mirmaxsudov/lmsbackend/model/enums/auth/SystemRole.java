@@ -5,5 +5,8 @@ public enum SystemRole {
     ADMIN,
     TEACHER,
     STUDENT,
-    PARENT
+    PARENT,
+    GUARDIAN,
+    MAINTAINER,
+    SUPPORT_TEACHER
 }

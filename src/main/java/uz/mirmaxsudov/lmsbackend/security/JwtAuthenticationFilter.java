@@ -1,6 +1,7 @@
 package uz.mirmaxsudov.lmsbackend.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -45,10 +46,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            final String jwt = authHeader.substring(7);
-            final String phoneNumber = jwtService.extractUsername(jwt);
-            if (phoneNumber != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(phoneNumber);
+            final String jwt = authHeader.substring(7).trim();
+            if (jwt.isEmpty()) {
+                throw new BadCredentialsException("JWT token is missing after Bearer prefix");
+            }
+            final String email = jwtService.extractUsername(jwt);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -57,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
             filterChain.doFilter(request, response);
-        } catch (BadCredentialsException | UsernameNotFoundException | SignatureException | ExpiredJwtException e) {
+        } catch (BadCredentialsException | UsernameNotFoundException | SignatureException | ExpiredJwtException | MalformedJwtException e) {
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
     }

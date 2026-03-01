@@ -2,6 +2,7 @@ package uz.mirmaxsudov.lmsbackend.security.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -57,11 +58,18 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
+        String normalizedToken = token == null ? "" : token.trim();
+        if (normalizedToken.isEmpty()) {
+            throw new MalformedJwtException("JWT token is empty");
+        }
+        if (normalizedToken.chars().anyMatch(Character::isWhitespace)) {
+            throw new MalformedJwtException("JWT token must not contain whitespace");
+        }
         return Jwts
                 .parser()
                 .verifyWith(getSignKey())
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(normalizedToken)
                 .getPayload();
     }
 
@@ -76,7 +84,7 @@ public class JwtService {
         return Jwts
                 .builder()
                 .claims(extraClaims)
-                .subject(user.getId().toString())
+                .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignKey(), Jwts.SIG.HS512)
