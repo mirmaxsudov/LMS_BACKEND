@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import uz.mirmaxsudov.lmsbackend.exceptions.InvalidTokenException;
 import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetailsService;
 import uz.mirmaxsudov.lmsbackend.security.service.JwtService;
 
@@ -40,17 +41,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || authHeader.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            final String jwt = authHeader.substring(7).trim();
-            if (jwt.isEmpty()) {
-                throw new BadCredentialsException("JWT token is missing after Bearer prefix");
+            final String[] authorizationParts = authHeader.trim().split("\\s+");
+            if (authorizationParts.length == 0 || !"Bearer".equalsIgnoreCase(authorizationParts[0])) {
+                filterChain.doFilter(request, response);
+                return;
             }
+
+            if (authorizationParts.length != 2)
+                throw new InvalidTokenException("Authorization header must be 'Bearer <token>'");
+
+            final String jwt = authorizationParts[1];
+
+            if (jwt.isEmpty())
+                throw new InvalidTokenException("JWT token is missing after Bearer prefix");
+
             final String email = jwtService.extractUsername(jwt);
+
+            if (email == null || email.isBlank())
+                throw new InvalidTokenException("JWT token subject is missing");
+
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
@@ -58,10 +73,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                } else {
+                    throw new InvalidTokenException("JWT token is invalid or expired");
                 }
             }
             filterChain.doFilter(request, response);
-        } catch (BadCredentialsException | UsernameNotFoundException | SignatureException | ExpiredJwtException | MalformedJwtException e) {
+        } catch (BadCredentialsException | InvalidTokenException | UsernameNotFoundException | SignatureException | ExpiredJwtException |
+                 MalformedJwtException e) {
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
     }

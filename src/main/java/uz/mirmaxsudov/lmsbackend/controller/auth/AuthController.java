@@ -39,7 +39,6 @@ public class AuthController {
     }
 
 
-    @OpenAuth
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AuthMe>> getMe(@AuthenticationPrincipal CustomUserDetails details) {
         return authService.getMe(details);
