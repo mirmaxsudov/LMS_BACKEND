@@ -1,0 +1,1 @@
+package uz.mirmaxsudov.lmsbackend.service.base.user; import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile; import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService; public interface StudentProfileService extends BaseCRUDService<StudentProfile> { }

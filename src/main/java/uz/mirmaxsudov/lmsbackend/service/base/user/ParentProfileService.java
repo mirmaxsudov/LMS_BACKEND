@@ -1,0 +1,1 @@
+package uz.mirmaxsudov.lmsbackend.service.base.user; import uz.mirmaxsudov.lmsbackend.model.entity.user.ParentProfile; import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService; public interface ParentProfileService extends BaseCRUDService<ParentProfile> { }

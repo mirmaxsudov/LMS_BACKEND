@@ -1,0 +1,1 @@
+package uz.mirmaxsudov.lmsbackend.repository.lms; import org.springframework.data.jpa.repository.JpaRepository; import org.springframework.stereotype.Repository; import uz.mirmaxsudov.lmsbackend.model.entity.lms.Submission; import java.util.UUID; @Repository public interface SubmissionRepository extends JpaRepository<Submission, UUID> { }

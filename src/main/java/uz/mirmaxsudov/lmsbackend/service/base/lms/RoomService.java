@@ -1,0 +1,1 @@
+package uz.mirmaxsudov.lmsbackend.service.base.lms; import uz.mirmaxsudov.lmsbackend.model.entity.lms.Room; import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService; public interface RoomService extends BaseCRUDService<Room> { }

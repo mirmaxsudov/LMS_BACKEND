@@ -1,0 +1,1 @@
+package uz.mirmaxsudov.lmsbackend.service.base.lms; import uz.mirmaxsudov.lmsbackend.model.entity.lms.Department; import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService; public interface DepartmentService extends BaseCRUDService<Department> { }

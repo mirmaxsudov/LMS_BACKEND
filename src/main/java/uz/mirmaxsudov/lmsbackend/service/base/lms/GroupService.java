@@ -1,0 +1,1 @@
+package uz.mirmaxsudov.lmsbackend.service.base.lms; import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group; import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService; public interface GroupService extends BaseCRUDService<Group> { }
