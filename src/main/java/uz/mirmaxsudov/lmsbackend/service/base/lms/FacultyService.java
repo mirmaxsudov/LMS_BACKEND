@@ -1,1 +1,0 @@
-package uz.mirmaxsudov.lmsbackend.service.base.lms; import uz.mirmaxsudov.lmsbackend.model.entity.lms.Faculty; import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService; public interface FacultyService extends BaseCRUDService<Faculty> { }

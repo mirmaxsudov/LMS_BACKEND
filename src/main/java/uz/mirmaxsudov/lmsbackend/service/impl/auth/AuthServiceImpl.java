@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
@@ -66,16 +67,7 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
                 .message("Get me successful")
                 .success(true)
-                .data(AuthMe.builder()
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .middleName(user.getMiddleName())
-                        .email(user.getEmail())
-                        .phoneNumber(user.getPhoneNumber())
-                        .email(user.getEmail())
-                        .gender(user.getGender())
-                        .roles(user.getRoles())
-                        .build())
+                .data(AuthMeMapper.toResponse(user))
                 .build());
     }
 }

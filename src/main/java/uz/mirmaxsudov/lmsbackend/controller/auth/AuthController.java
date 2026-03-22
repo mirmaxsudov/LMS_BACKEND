@@ -14,7 +14,7 @@ import uz.mirmaxsudov.lmsbackend.model.response.auth.AuthMe;
 import uz.mirmaxsudov.lmsbackend.model.response.auth.JwtResponse;
 import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
 import uz.mirmaxsudov.lmsbackend.service.base.auth.AuthService;
-import uz.mirmaxsudov.lmsbackend.util.APIUtil;
+import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
 
 @RestController
 @RequiredArgsConstructor

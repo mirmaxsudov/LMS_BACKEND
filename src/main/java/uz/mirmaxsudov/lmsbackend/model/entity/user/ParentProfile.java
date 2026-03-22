@@ -18,7 +18,6 @@ public class ParentProfile extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "parent_students",
