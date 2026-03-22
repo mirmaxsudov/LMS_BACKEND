@@ -16,8 +16,17 @@ public class TeacherProfileSpecification {
             if (filter.getPosition() != null)
                 predicates.add(cb.equal(root.get("position"), filter.getPosition()));
 
-            if (filter.getSearch() != null)
-                predicates.add(cb.like(root.get("fullName"), "%" + filter.getSearch() + "%"));
+            if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
+                var userJoin = root.join("user");
+                String pattern = "%" + filter.getSearch().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(userJoin.get("firstName")), pattern),
+                        cb.like(cb.lower(userJoin.get("lastName")), pattern),
+                        cb.like(cb.lower(userJoin.get("middleName")), pattern),
+                        cb.like(cb.lower(userJoin.get("email")), pattern),
+                        cb.like(cb.lower(userJoin.get("phoneNumber")), pattern)
+                ));
+            }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };

@@ -27,7 +27,9 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
 
     @Override
     public ResponseEntity<ApiPaginateResponse<List<StudentProfileResponse>>> getStudentProfilePaginateResponse(int page, int size, String search, StudentStatus status) {
-        Pageable pageable = PageableBuilder.build(page, size);
+        int normalizedPage = Math.max(page - 1, 0);
+        int normalizedSize = size <= 0 ? 10 : size;
+        Pageable pageable = PageableBuilder.build(normalizedPage, normalizedSize);
         Specification<StudentProfile> filter = StudentProfileSpecification.filter(StudentProfileFilter.builder()
                 .search(search)
                 .status(status)
@@ -48,10 +50,11 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
                         .message("Student profiles fetched successfully")
                         .results(results)
                         .total((int) studentProfiles.getTotalElements())
-                        .page(studentProfiles.getNumber())
+                        .page(studentProfiles.getNumber() + 1)
                         .size(studentProfiles.getSize())
                         .hasNext(studentProfiles.hasNext())
                         .build()
         );
     }
 }
+

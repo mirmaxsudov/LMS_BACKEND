@@ -5,8 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
@@ -27,7 +27,9 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
 
     @Override
     public ResponseEntity<ApiPaginateResponse<List<TeacherProfileResponse>>> getTeacherProfilePaginateResponse(int page, int size, String search, TeacherPosition position) {
-        Pageable pageable = PageableBuilder.build(page, size);
+        int normalizedPage = Math.max(page - 1, 0);
+        int normalizedSize = size <= 0 ? 10 : size;
+        Pageable pageable = PageableBuilder.build(normalizedPage, normalizedSize);
         Specification<TeacherProfile> filter = TeacherProfileSpecification.filter(TeacherProfileFilter.builder()
                 .search(search)
                 .position(position)
@@ -47,10 +49,11 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
                         .message("Teacher profiles fetched successfully")
                         .results(results)
                         .total((int) teacherProfiles.getTotalElements())
-                        .page(teacherProfiles.getNumber())
+                        .page(teacherProfiles.getNumber() + 1)
                         .size(teacherProfiles.getSize())
                         .hasNext(teacherProfiles.hasNext())
                         .build()
         );
     }
 }
+

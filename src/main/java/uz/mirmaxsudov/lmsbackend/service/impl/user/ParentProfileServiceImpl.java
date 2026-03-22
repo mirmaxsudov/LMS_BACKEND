@@ -26,7 +26,9 @@ public class ParentProfileServiceImpl extends BaseCRUDServiceImpl<ParentProfile,
 
     @Override
     public ResponseEntity<ApiPaginateResponse<List<ParentProfileResponse>>> getParentProfilePaginateResponse(int page, int size, String search) {
-        Pageable pageable = PageableBuilder.build(page, size);
+        int normalizedPage = Math.max(page - 1, 0);
+        int normalizedSize = size <= 0 ? 10 : size;
+        Pageable pageable = PageableBuilder.build(normalizedPage, normalizedSize);
         Specification<ParentProfile> filter = ParentProfileSpecification.filter(ParentProfileFilter.builder()
                 .search(search)
                 .build());
@@ -45,10 +47,11 @@ public class ParentProfileServiceImpl extends BaseCRUDServiceImpl<ParentProfile,
                         .message("Parent profiles fetched successfully")
                         .results(results)
                         .total((int) parentProfiles.getTotalElements())
-                        .page(parentProfiles.getNumber())
+                        .page(parentProfiles.getNumber() + 1)
                         .size(parentProfiles.getSize())
                         .hasNext(parentProfiles.hasNext())
                         .build()
         );
     }
 }
+
