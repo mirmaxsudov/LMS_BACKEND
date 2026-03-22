@@ -13,7 +13,6 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 public class BucketService {
-
     private final RateLimitStorage rateLimitStorage;
 
     public Bucket getOrCreateBucket(String key, RateLimitProperties.LimitConfig config) {

@@ -14,7 +14,20 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                        .allowedHeaders("*")
+                        .exposedHeaders(
+                                "Tus-Resumable",
+                                "Tus-Version",
+                                "Tus-Extension",
+                                "Tus-Max-Size",
+                                "Upload-Offset",
+                                "Upload-Length",
+                                "Upload-Metadata",
+                                "Location",
+                                "Content-Range",
+                                "Accept-Ranges"
+                        );
             }
         };
     }

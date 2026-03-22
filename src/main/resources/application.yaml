@@ -4,6 +4,17 @@ spring:
   profiles:
     active: dev
 
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket: ${MINIO_BUCKET:uploads}
+  region: ${MINIO_REGION:us-east-1}
+
+tus:
+  max-upload-size-bytes: ${TUS_MAX_UPLOAD_SIZE_BYTES:10737418240}
+  chunk-cleanup-on-complete: ${TUS_CHUNK_CLEANUP_ON_COMPLETE:true}
+
 rate-limit:
   defaultLimit:
     capacity: 100

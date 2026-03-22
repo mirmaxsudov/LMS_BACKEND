@@ -79,7 +79,30 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Accept", "Origin"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Cache-Control",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "Range",
+                "Tus-Resumable",
+                "Upload-Length",
+                "Upload-Offset",
+                "Upload-Metadata"
+        ));
+        configuration.setExposedHeaders(List.of(
+                "Tus-Resumable",
+                "Tus-Version",
+                "Tus-Extension",
+                "Tus-Max-Size",
+                "Upload-Offset",
+                "Upload-Length",
+                "Upload-Metadata",
+                "Location",
+                "Content-Range",
+                "Accept-Ranges"
+        ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(300L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
