@@ -1,14 +1,21 @@
 package uz.mirmaxsudov.lmsbackend.controller.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
+import uz.mirmaxsudov.lmsbackend.model.request.user.ParentProfileRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.user.user.ParentProfileResponse;
+import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
 import uz.mirmaxsudov.lmsbackend.service.base.user.ParentProfileService;
 
 import java.util.List;
@@ -26,5 +33,13 @@ public class ParentProfileController {
             @RequestParam(value = "search", required = false) String search
     ) {
         return parentProfileService.getParentProfilePaginateResponse(page, size, search);
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<ParentProfileResponse>> postParentProfile(
+            @RequestBody @Valid ParentProfileRequest request,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return parentProfileService.postParentProfile(request, details);
     }
 }

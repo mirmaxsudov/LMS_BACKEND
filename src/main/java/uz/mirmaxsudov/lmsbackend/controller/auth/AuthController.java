@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import uz.mirmaxsudov.lmsbackend.anotations.OpenAuth;
+import uz.mirmaxsudov.lmsbackend.annotations.OpenAuth;
 import uz.mirmaxsudov.lmsbackend.config.RateLimit;
 import uz.mirmaxsudov.lmsbackend.model.request.auth.LoginRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;

@@ -1,8 +1,8 @@
-package uz.mirmaxsudov.lmsbackend.anotations.validation;
+package uz.mirmaxsudov.lmsbackend.annotations.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import uz.mirmaxsudov.lmsbackend.anotations.validation.validators.UniqueElementsValidator;
+import uz.mirmaxsudov.lmsbackend.annotations.validation.validators.UniqueElementsValidator;
 
 import java.lang.annotation.*;
 

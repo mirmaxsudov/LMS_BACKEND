@@ -11,7 +11,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
-import uz.mirmaxsudov.lmsbackend.anotations.OpenAuth;
+import uz.mirmaxsudov.lmsbackend.annotations.OpenAuth;
 
 import java.util.*;
 

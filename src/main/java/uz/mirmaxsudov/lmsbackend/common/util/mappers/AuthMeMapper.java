@@ -16,7 +16,7 @@ public final class AuthMeMapper {
                 .phoneNumber(user.getPhoneNumber())
                 .gender(user.getGender())
                 .status(user.getStatus())
-                .birthDate(user.getBrithDate())
+                .birthDate(user.getBrithDate().toString())
                 .roles(user.getRoles())
                 .build();
     }

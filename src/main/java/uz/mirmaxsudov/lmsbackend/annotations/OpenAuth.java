@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.anotations;
+package uz.mirmaxsudov.lmsbackend.annotations;
 
 import java.lang.annotation.*;
 

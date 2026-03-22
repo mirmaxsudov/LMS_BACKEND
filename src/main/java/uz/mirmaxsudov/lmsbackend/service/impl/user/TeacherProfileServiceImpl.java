@@ -7,22 +7,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
+import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
+import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
+import uz.mirmaxsudov.lmsbackend.model.request.user.TeacherProfileRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.user.user.TeacherProfileResponse;
 import uz.mirmaxsudov.lmsbackend.repository.user.TeacherProfileRepository;
 import uz.mirmaxsudov.lmsbackend.repository.user.specification.TeacherProfileSpecification;
 import uz.mirmaxsudov.lmsbackend.repository.user.specification.dto.TeacherProfileFilter;
+import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
+import uz.mirmaxsudov.lmsbackend.service.base.UserService;
 import uz.mirmaxsudov.lmsbackend.service.base.user.TeacherProfileService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfile, TeacherProfileRepository> implements TeacherProfileService {
-    public TeacherProfileServiceImpl(TeacherProfileRepository repository) {
+    private final UserService userService;
+
+    public TeacherProfileServiceImpl(TeacherProfileRepository repository, UserService userService) {
         super(repository);
+        this.userService = userService;
     }
 
     @Override
@@ -55,5 +65,24 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
                         .build()
         );
     }
-}
 
+    @Override
+    public ResponseEntity<ApiResponse<TeacherProfileResponse>> postTeacherProfile(TeacherProfileRequest request, CustomUserDetails details) {
+        User user = userService.getById(request.getUserId()).orElseThrow(() -> new CustomNotFoundException("User not found"));
+
+        TeacherProfile newTeacherProfile = TeacherProfile.builder()
+                .user(user)
+                .position(request.getPosition())
+                .build();
+
+        repository.save(newTeacherProfile);
+        return ResponseEntity.ok(ApiResponse.<TeacherProfileResponse>builder()
+                .success(true)
+                .message("Teacher profile created successfully")
+                .data(TeacherProfileResponse.builder()
+                        .position(newTeacherProfile.getPosition())
+                        .baseData(AuthMeMapper.toResponse(newTeacherProfile.getUser()))
+                        .build())
+                .build());
+    }
+}

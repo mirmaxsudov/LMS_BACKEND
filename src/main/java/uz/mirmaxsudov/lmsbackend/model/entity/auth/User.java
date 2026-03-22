@@ -6,6 +6,7 @@ import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,7 +29,7 @@ public class User extends BaseEntity {
     private String middleName;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    private String brithDate;
+    private LocalDateTime brithDate;
     private String phoneNumber;
     @Column(unique = true, nullable = false)
     private String email;

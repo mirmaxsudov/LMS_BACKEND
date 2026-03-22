@@ -1,16 +1,17 @@
 package uz.mirmaxsudov.lmsbackend.controller.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
+import uz.mirmaxsudov.lmsbackend.model.request.user.TeacherProfileRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.user.user.TeacherProfileResponse;
+import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
 import uz.mirmaxsudov.lmsbackend.service.base.user.TeacherProfileService;
 
 import java.util.List;
@@ -29,5 +30,13 @@ public class TeacherProfileController {
             @RequestParam(value = "position", required = false) TeacherPosition position
     ) {
         return teacherProfileService.getTeacherProfilePaginateResponse(page, size, search, position);
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<TeacherProfileResponse>> postTeacherProfile(
+            @RequestBody @Valid TeacherProfileRequest request,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return teacherProfileService.postTeacherProfile(request, details);
     }
 }
