@@ -7,11 +7,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import uz.mirmaxsudov.lmsbackend.filter.RateLimitFilter;
+import uz.mirmaxsudov.lmsbackend.config.RateLimitInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
+
+    private final RateLimitInterceptor rateLimitInterceptor;
+    private final RateLimitFilter rateLimitFilter;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(rateLimitInterceptor);
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -26,5 +37,15 @@ public class WebConfig implements WebMvcConfigurer {
         filterRegBean.setFilter(new ForwardedHeaderFilter());
         filterRegBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return filterRegBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration() {
+        FilterRegistrationBean<RateLimitFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(rateLimitFilter);
+        registrationBean.addUrlPatterns("/*");
+        // Ensure it runs after security filter so we have access to user details
+        registrationBean.setOrder(Ordered.LOWEST_PRECEDENCE);
+        return registrationBean;
     }
 }

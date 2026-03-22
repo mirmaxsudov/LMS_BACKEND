@@ -3,3 +3,28 @@ spring:
     name: LMS_BACKEND
   profiles:
     active: dev
+
+rate-limit:
+  defaultLimit:
+    capacity: 100
+    refill: 100
+    duration: 60
+  endpointLimits:
+    "[ /api/auth/** ]":
+      capacity: 5
+      refill: 5
+      duration: 60
+    "[ /api/admin/** ]":
+      capacity: 20
+      refill: 20
+      duration: 60
+  userLimits:
+    "[ admin@example.com ]":
+      capacity: 1000
+      refill: 1000
+      duration: 60
+  ipLimits:
+    "[ 127.0.0.1 ]":
+      capacity: 500
+      refill: 500
+      duration: 60
