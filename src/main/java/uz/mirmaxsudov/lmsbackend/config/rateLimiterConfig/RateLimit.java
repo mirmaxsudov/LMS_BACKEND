@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.config;
+package uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

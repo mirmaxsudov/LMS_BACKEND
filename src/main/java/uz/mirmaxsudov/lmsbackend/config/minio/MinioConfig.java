@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.config;
+package uz.mirmaxsudov.lmsbackend.config.minio;
 
 import io.minio.MinioClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

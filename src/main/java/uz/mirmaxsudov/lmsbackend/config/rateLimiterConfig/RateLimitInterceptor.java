@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.config;
+package uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig;
 
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;

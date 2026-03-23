@@ -14,33 +14,31 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "enrollments", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"group_id", "student_profile_id"})
-}, indexes = {
-        @Index(columnList = "group_id"),
-        @Index(columnList = "student_profile_id"),
-        @Index(columnList = "status")
-})
+@Table(name = "enrollments",
+        indexes = {
+                @Index(name = "idx_enrollment_group", columnList = "group_id"),
+                @Index(name = "idx_enrollment_student", columnList = "student_id"),
+                @Index(name = "idx_enrollment_status", columnList = "status")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_enrollment_student_group", columnNames = {"student_id", "group_id"})
+        })
 public class Enrollment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
-    private LmsGroup group;
+    @JoinColumn(name = "student_id", nullable = false)
+    private StudentProfile student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_profile_id", nullable = false)
-    private StudentProfile studentProfile;
+    @JoinColumn(name = "group_id", nullable = false)
+    private Group group;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EnrollmentStatus status = EnrollmentStatus.ACTIVE;
+    private EnrollmentStatus status;
 
-    @Column(nullable = false)
-    private LocalDateTime enrolledAt;
+    private LocalDateTime joinedAt;
+    private LocalDateTime leftAt;
 
-    @PrePersist
-    public void prePersistEnrollment() {
-        if (enrolledAt == null) {
-            enrolledAt = LocalDateTime.now();
-        }
-    }
+    @Column(columnDefinition = "TEXT")
+    private String note;
 }

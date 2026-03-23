@@ -19,5 +19,7 @@ public class UserPreview {
     private String email;
     private String phoneNumber;
     private UserStatus status;
+    private String profileImageUrl;
+    private String profileBackgroundUrl;
     private Set<String> roles;
 }

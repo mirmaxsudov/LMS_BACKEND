@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import uz.mirmaxsudov.lmsbackend.config.TusProperties;
+import uz.mirmaxsudov.lmsbackend.config.minio.TusProperties;
 import uz.mirmaxsudov.lmsbackend.model.tus.DownloadPayload;
 import uz.mirmaxsudov.lmsbackend.model.tus.TusUpload;
 import uz.mirmaxsudov.lmsbackend.model.tus.UploadChunk;

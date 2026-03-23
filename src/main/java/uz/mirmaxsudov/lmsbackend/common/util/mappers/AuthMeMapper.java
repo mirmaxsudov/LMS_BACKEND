@@ -16,7 +16,19 @@ public final class AuthMeMapper {
                 .phoneNumber(user.getPhoneNumber())
                 .gender(user.getGender())
                 .status(user.getStatus())
-                .birthDate(user.getBrithDate().toString())
+                .birthDate(user.getBrithDate() == null ? null : user.getBrithDate().toString())
+                .profileImageAttachmentId(
+                        user.getProfileImageAttachment() == null ? null : user.getProfileImageAttachment().getId()
+                )
+                .profileImageUrl(
+                        user.getProfileImageAttachment() == null ? null : user.getProfileImageAttachment().getUrl()
+                )
+                .profileBackgroundAttachmentId(
+                        user.getProfileBackgroundAttachment() == null ? null : user.getProfileBackgroundAttachment().getId()
+                )
+                .profileBackgroundUrl(
+                        user.getProfileBackgroundAttachment() == null ? null : user.getProfileBackgroundAttachment().getUrl()
+                )
                 .roles(user.getRoles())
                 .build();
     }

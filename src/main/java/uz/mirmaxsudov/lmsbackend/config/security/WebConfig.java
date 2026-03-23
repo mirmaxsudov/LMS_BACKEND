@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uz.mirmaxsudov.lmsbackend.filter.RateLimitFilter;
-import uz.mirmaxsudov.lmsbackend.config.RateLimitInterceptor;
+import uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig.RateLimitInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -44,7 +44,6 @@ public class WebConfig implements WebMvcConfigurer {
         FilterRegistrationBean<RateLimitFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(rateLimitFilter);
         registrationBean.addUrlPatterns("/*");
-        // Ensure it runs after security filter so we have access to user details
         registrationBean.setOrder(Ordered.LOWEST_PRECEDENCE);
         return registrationBean;
     }

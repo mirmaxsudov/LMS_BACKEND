@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.config;
+package uz.mirmaxsudov.lmsbackend.config.minio;
 
 import lombok.Getter;
 import lombok.Setter;

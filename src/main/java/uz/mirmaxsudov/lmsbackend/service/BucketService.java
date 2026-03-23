@@ -5,7 +5,7 @@ import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uz.mirmaxsudov.lmsbackend.config.RateLimitProperties;
+import uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig.RateLimitProperties;
 import uz.mirmaxsudov.lmsbackend.util.RateLimitStorage;
 
 import java.time.Duration;

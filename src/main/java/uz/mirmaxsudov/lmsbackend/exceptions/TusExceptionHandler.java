@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.controller;
+package uz.mirmaxsudov.lmsbackend.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -6,6 +6,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import uz.mirmaxsudov.lmsbackend.controller.TusController;
 import uz.mirmaxsudov.lmsbackend.storage.StorageException;
 import uz.mirmaxsudov.lmsbackend.tus.TusProtocolException;
 

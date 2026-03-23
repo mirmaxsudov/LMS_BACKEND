@@ -1,7 +1,7 @@
 package uz.mirmaxsudov.lmsbackend.model.enums.lms;
 
-public enum SemesterStatus {
+public enum LessonStatus {
     PLANNED,
-    ACTIVE,
-    FINISHED
+    DONE,
+    CANCELLED
 }

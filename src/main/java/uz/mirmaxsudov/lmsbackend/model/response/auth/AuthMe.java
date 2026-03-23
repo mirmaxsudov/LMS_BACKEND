@@ -8,6 +8,7 @@ import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -21,5 +22,9 @@ public class AuthMe {
     private Gender gender;
     private UserStatus status;
     private String birthDate;
+    private UUID profileImageAttachmentId;
+    private String profileImageUrl;
+    private UUID profileBackgroundAttachmentId;
+    private String profileBackgroundUrl;
     private Set<Role> roles;
 }

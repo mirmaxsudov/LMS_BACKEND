@@ -2,6 +2,7 @@ package uz.mirmaxsudov.lmsbackend.model.entity.auth;
 
 import jakarta.persistence.*;
 import lombok.*;
+import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
@@ -19,7 +20,9 @@ import java.util.Set;
 @Table(name = "users",
         indexes = {
                 @Index(columnList = "email", unique = true),
-                @Index(columnList = "id")}
+                @Index(columnList = "id"),
+                @Index(columnList = "profile_image_attachment_id"),
+                @Index(columnList = "profile_background_attachment_id")}
 )
 public class User extends BaseEntity {
     @Column(nullable = false)
@@ -37,6 +40,14 @@ public class User extends BaseEntity {
     private String password;
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.ACTIVE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_image_attachment_id")
+    private Attachment profileImageAttachment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_background_attachment_id")
+    private Attachment profileBackgroundAttachment;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

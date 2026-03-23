@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.config;
+package uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import uz.mirmaxsudov.lmsbackend.config.RateLimitProperties;
+import uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig.RateLimitProperties;
 import uz.mirmaxsudov.lmsbackend.service.BucketService;
 
 import java.io.IOException;

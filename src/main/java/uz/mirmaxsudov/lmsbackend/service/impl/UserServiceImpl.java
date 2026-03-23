@@ -64,6 +64,8 @@ public class UserServiceImpl implements UserService {
                         .email(user.getEmail())
                         .phoneNumber(user.getPhoneNumber())
                         .status(user.getStatus())
+                        .profileImageUrl(user.getProfileImageAttachment() == null ? null : user.getProfileImageAttachment().getUrl())
+                        .profileBackgroundUrl(user.getProfileBackgroundAttachment() == null ? null : user.getProfileBackgroundAttachment().getUrl())
                         .roles(mapRoleNames(user.getRoles()))
                         .build())
                 .toList();
