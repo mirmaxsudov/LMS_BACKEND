@@ -1,0 +1,74 @@
+package uz.mirmaxsudov.lmsbackend.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
+import uz.mirmaxsudov.lmsbackend.model.enums.content.AttachmentType;
+import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.content.AttachmentResponse;
+import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
+import uz.mirmaxsudov.lmsbackend.service.base.AttachmentService;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(APIUtil.API_BASE_URL + "attachments")
+public class AttachmentController {
+    private final AttachmentService attachmentService;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<AttachmentResponse>> upload(
+            @RequestPart("file") MultipartFile file,
+            @RequestParam(required = false) AttachmentType type,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        AttachmentResponse response = attachmentService.toResponse(
+                attachmentService.upload(file, type, details.user())
+        );
+
+        return ResponseEntity.ok(ApiResponse.<AttachmentResponse>builder()
+                .success(true)
+                .message("Attachment uploaded successfully")
+                .data(response)
+                .build());
+    }
+
+    @PostMapping(value = "/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<List<AttachmentResponse>>> uploadMany(
+            @RequestPart("files") List<MultipartFile> files,
+            @RequestParam(required = false) AttachmentType type,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        List<AttachmentResponse> responses = attachmentService.uploadMany(files, type, details.user());
+
+        return ResponseEntity.ok(ApiResponse.<List<AttachmentResponse>>builder()
+                .success(true)
+                .message("Attachments uploaded successfully")
+                .data(responses)
+                .build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @PathVariable UUID id
+    ) {
+        attachmentService.delete(id);
+
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .success(true)
+                .message("Attachment deleted successfully")
+                .build());
+    }
+}

@@ -3,6 +3,8 @@ package uz.mirmaxsudov.lmsbackend.service.base.auth;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import uz.mirmaxsudov.lmsbackend.model.request.auth.AuthMeRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.auth.JwtResponse;
 import uz.mirmaxsudov.lmsbackend.model.request.auth.LoginRequest;
@@ -15,4 +17,8 @@ public interface AuthService {
     ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response);
 
     ResponseEntity<ApiResponse<AuthMe>> getMe(CustomUserDetails details);
+
+    ResponseEntity<ApiResponse<AuthMe>> patchMe(AuthMeRequest request, CustomUserDetails details);
+
+    ResponseEntity<ApiResponse<AuthMe>> patchProfileImage(MultipartFile profileImage, CustomUserDetails details);
 }

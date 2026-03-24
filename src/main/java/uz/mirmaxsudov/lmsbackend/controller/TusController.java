@@ -55,17 +55,16 @@ public class TusController {
     ) {
         validateTusResumable(tusResumable);
 
-        if (uploadLength == null) {
+        if (uploadLength == null)
             throw new TusProtocolException(HttpStatus.BAD_REQUEST, "Upload-Length header is required");
-        }
 
         Map<String, String> metadata = TusMetadataParser.parse(uploadMetadata);
         TusUpload upload = uploadService.createUpload(uploadLength, metadata);
 
         String location = request.getRequestURL().toString();
-        if (!location.endsWith("/")) {
+        if (!location.endsWith("/"))
             location += "/";
-        }
+
         location += upload.getId();
 
         HttpHeaders headers = baseTusHeaders();
@@ -85,14 +84,13 @@ public class TusController {
     ) throws Exception {
         validateTusResumable(tusResumable);
 
-        if (uploadOffset == null) {
+        if (uploadOffset == null)
             throw new TusProtocolException(HttpStatus.BAD_REQUEST, "Upload-Offset header is required");
-        }
 
         long chunkSize = request.getContentLengthLong();
-        if (chunkSize <= 0) {
+
+        if (chunkSize <= 0)
             throw new TusProtocolException(HttpStatus.BAD_REQUEST, "Content-Length must be greater than zero for PATCH");
-        }
 
         long newOffset = uploadService.appendChunk(id, uploadOffset, chunkSize, request.getInputStream());
 
@@ -124,7 +122,6 @@ public class TusController {
             @RequestHeader(value = HEADER_TUS_RESUMABLE, required = false) String tusResumable
     ) {
         validateTusResumable(tusResumable);
-
         uploadService.deleteUpload(id);
         return ResponseEntity.noContent().headers(baseTusHeaders()).build();
     }

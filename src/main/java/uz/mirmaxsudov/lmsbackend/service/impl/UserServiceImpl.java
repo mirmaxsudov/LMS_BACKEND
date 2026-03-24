@@ -86,6 +86,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId);
     }
 
+    @Override
+    public User saveOrUpdate(User user) {
+        return userRepository.save(user);
+    }
+
     private Set<String> mapRoleNames(Set<Role> roles) {
         if (roles == null || roles.isEmpty()) {
             return Set.of();

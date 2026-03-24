@@ -1,5 +1,6 @@
 package uz.mirmaxsudov.lmsbackend.tus;
 
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
@@ -7,10 +8,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+@NoArgsConstructor
 public final class TusMetadataParser {
-    private TusMetadataParser() {
-    }
-
     public static Map<String, String> parse(String raw) {
         Map<String, String> metadata = new HashMap<>();
         if (raw == null || raw.isBlank())
@@ -28,13 +27,12 @@ public final class TusMetadataParser {
                 continue;
 
             String value = "";
-            if (keyValue.length == 2 && !keyValue[1].isBlank()) {
+            if (keyValue.length == 2 && !keyValue[1].isBlank())
                 try {
                     value = new String(Base64.getDecoder().decode(keyValue[1].trim()), StandardCharsets.UTF_8);
                 } catch (IllegalArgumentException e) {
                     throw new TusProtocolException(HttpStatus.BAD_REQUEST, "Invalid Upload-Metadata base64 for key: " + key);
                 }
-            }
 
             metadata.put(key, value);
         }

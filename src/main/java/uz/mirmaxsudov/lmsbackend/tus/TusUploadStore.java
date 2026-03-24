@@ -24,9 +24,8 @@ public class TusUploadStore {
 
     public TusUpload getRequired(String id) {
         TusUpload upload = uploads.get(id);
-        if (upload == null) {
+        if (upload == null)
             throw new TusProtocolException(HttpStatus.NOT_FOUND, "Upload not found: " + id);
-        }
         return upload;
     }
 

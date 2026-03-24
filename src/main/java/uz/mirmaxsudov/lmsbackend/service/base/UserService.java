@@ -24,4 +24,6 @@ public interface UserService {
     );
 
     Optional<User> getById(UUID userId);
+
+    User saveOrUpdate(User user);
 }

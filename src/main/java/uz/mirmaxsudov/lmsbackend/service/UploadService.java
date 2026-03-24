@@ -93,9 +93,8 @@ public class UploadService {
                     .toList();
 
             storageService.removeObjects(chunkObjectKeys);
-            if (storageService.objectExists(upload.getObjectKey())) {
+            if (storageService.objectExists(upload.getObjectKey()))
                 storageService.removeObject(upload.getObjectKey());
-            }
 
             tusUploadStore.remove(id);
             log.info("Deleted upload id={} and cleaned storage", id);
