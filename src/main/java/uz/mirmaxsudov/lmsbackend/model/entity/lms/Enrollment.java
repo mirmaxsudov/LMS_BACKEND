@@ -18,10 +18,11 @@ import java.time.LocalDateTime;
         indexes = {
                 @Index(name = "idx_enrollment_group", columnList = "group_id"),
                 @Index(name = "idx_enrollment_student", columnList = "student_id"),
-                @Index(name = "idx_enrollment_status", columnList = "status")
+                @Index(name = "idx_enrollment_status", columnList = "status"),
+                @Index(name = "idx_enrollment_deleted", columnList = "deleted")
         },
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_enrollment_student_group", columnNames = {"student_id", "group_id"})
+                @UniqueConstraint(name = "uk_enrollment_student_group_deleted", columnNames = {"student_id", "group_id", "deleted"})
         })
 public class Enrollment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)

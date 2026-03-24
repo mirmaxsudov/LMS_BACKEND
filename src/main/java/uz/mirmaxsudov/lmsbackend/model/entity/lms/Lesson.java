@@ -29,9 +29,13 @@ public class Lesson extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String topic;
 
+    @Column(nullable = false)
     private LocalDateTime startTime;
+
+    @Column(nullable = false)
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LessonStatus status;
 }

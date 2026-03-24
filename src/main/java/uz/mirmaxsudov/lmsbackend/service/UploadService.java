@@ -89,7 +89,7 @@ public class UploadService {
         upload.lock();
         try {
             List<String> chunkObjectKeys = upload.getChunks().stream()
-                    .map(UploadChunk::getObjectKey)
+                    .map(UploadChunk::objectKey)
                     .toList();
 
             storageService.removeObjects(chunkObjectKeys);
@@ -131,8 +131,8 @@ public class UploadService {
 
     private void completeUpload(TusUpload upload) {
         List<String> orderedChunks = upload.getChunks().stream()
-                .sorted(Comparator.comparingLong(UploadChunk::getOffset))
-                .map(UploadChunk::getObjectKey)
+                .sorted(Comparator.comparingLong(UploadChunk::offset))
+                .map(UploadChunk::objectKey)
                 .toList();
 
         storageService.composeObject(upload.getObjectKey(), orderedChunks);
