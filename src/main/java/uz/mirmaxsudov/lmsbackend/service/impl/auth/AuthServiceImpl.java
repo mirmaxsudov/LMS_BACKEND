@@ -81,28 +81,49 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<AuthMe>> patchMe(AuthMeRequest request, CustomUserDetails details) {
+    public ResponseEntity<ApiResponse<AuthMe>> patchMe(
+            AuthMeRequest request,
+            MultipartFile profileImage,
+            MultipartFile profileBackgroundImage,
+            CustomUserDetails details
+    ) {
         User user = details.user();
 
-        if (request.getFirstName() != null && request.getFirstName().isBlank())
-            throw new CustomBadRequestException("First name cannot be blank");
+        boolean hasRequestPatch = request != null;
+        boolean hasProfileImagePatch = profileImage != null;
+        boolean hasProfileBackgroundPatch = profileBackgroundImage != null;
 
-        if (request.getLastName() != null && request.getLastName().isBlank())
-            throw new CustomBadRequestException("Last name cannot be blank");
+        if (!hasRequestPatch && !hasProfileImagePatch && !hasProfileBackgroundPatch)
+            throw new CustomBadRequestException("No patch data provided");
 
-        if (request.getEmail() != null) {
-            String newEmail = request.getEmail().trim();
-            if (newEmail.isBlank())
-                throw new CustomBadRequestException("Email cannot be blank");
+        if (hasRequestPatch) {
+            if (request.getFirstName() != null && request.getFirstName().isBlank())
+                throw new CustomBadRequestException("First name cannot be blank");
 
-            userService.getUserByEmail(newEmail)
-                    .filter(existingUser -> !existingUser.getId().equals(user.getId()))
-                    .ifPresent(existingUser -> {
-                        throw new CustomConflictException("Email already exists: " + newEmail);
-                    });
+            if (request.getLastName() != null && request.getLastName().isBlank())
+                throw new CustomBadRequestException("Last name cannot be blank");
+
+            if (request.getEmail() != null) {
+                String newEmail = request.getEmail().trim();
+                if (newEmail.isBlank())
+                    throw new CustomBadRequestException("Email cannot be blank");
+
+                userService.getUserByEmail(newEmail)
+                        .filter(existingUser -> !existingUser.getId().equals(user.getId()))
+                        .ifPresent(existingUser -> {
+                            throw new CustomConflictException("Email already exists: " + newEmail);
+                        });
+            }
+
+            authMePatchMapper.patch(request, user);
         }
 
-        authMePatchMapper.patch(request, user);
+        if (hasProfileImagePatch)
+            patchProfileImage(profileImage, user);
+
+        if (hasProfileBackgroundPatch)
+            patchProfileBackgroundImage(profileBackgroundImage, user);
+
         userService.saveOrUpdate(user);
 
         return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
@@ -112,27 +133,29 @@ public class AuthServiceImpl implements AuthService {
                 .build());
     }
 
-    @Override
-    public ResponseEntity<ApiResponse<AuthMe>> patchProfileImage(MultipartFile profileImage, CustomUserDetails details) {
-        if (profileImage == null || profileImage.isEmpty())
+    private void patchProfileImage(MultipartFile profileImage, User user) {
+        if (profileImage.isEmpty())
             throw new CustomBadRequestException("Profile image file must not be empty");
 
-        User user = details.user();
         Attachment previousAttachment = user.getProfileImageAttachment();
         Attachment uploadedAttachment = attachmentService.upload(profileImage, AttachmentType.IMAGE, user);
 
         user.setProfileImageAttachment(uploadedAttachment);
-        userService.saveOrUpdate(user);
 
         if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
             attachmentService.delete(previousAttachment.getId());
+    }
 
-        return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
-                .message("Profile image updated successfully")
-                .success(true)
-                .data(AuthMeMapper.toResponse(user))
-                .build());
+    private void patchProfileBackgroundImage(MultipartFile profileBackgroundImage, User user) {
+        if (profileBackgroundImage.isEmpty())
+            throw new CustomBadRequestException("Profile background image file must not be empty");
+
+        Attachment previousAttachment = user.getProfileBackgroundAttachment();
+        Attachment uploadedAttachment = attachmentService.upload(profileBackgroundImage, AttachmentType.IMAGE, user);
+
+        user.setProfileBackgroundAttachment(uploadedAttachment);
+
+        if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
+            attachmentService.delete(previousAttachment.getId());
     }
 }
-
-

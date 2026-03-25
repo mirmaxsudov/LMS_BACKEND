@@ -18,7 +18,10 @@ public interface AuthService {
 
     ResponseEntity<ApiResponse<AuthMe>> getMe(CustomUserDetails details);
 
-    ResponseEntity<ApiResponse<AuthMe>> patchMe(AuthMeRequest request, CustomUserDetails details);
-
-    ResponseEntity<ApiResponse<AuthMe>> patchProfileImage(MultipartFile profileImage, CustomUserDetails details);
+    ResponseEntity<ApiResponse<AuthMe>> patchMe(
+            AuthMeRequest request,
+            MultipartFile profileImage,
+            MultipartFile profileBackgroundImage,
+            CustomUserDetails details
+    );
 }

@@ -11,7 +11,6 @@ import uz.mirmaxsudov.lmsbackend.model.request.auth.AuthMeRequest;
 
 @Mapper(componentModel = "spring")
 public interface AuthMePatchMapper {
-
     @Mapping(target = "email", source = "email", qualifiedByName = "trim")
     @Mapping(target = "lastName", source = "lastName", qualifiedByName = "trim")
     @Mapping(target = "firstName", source = "firstName", qualifiedByName = "trim")

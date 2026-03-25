@@ -45,17 +45,19 @@ public class AuthController {
         return authService.getMe(details);
     }
 
-    @PatchMapping("/me")
+    @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<AuthMe>> patchMe(
             @RequestBody @Valid AuthMeRequest request,
             @AuthenticationPrincipal CustomUserDetails details) {
-        return authService.patchMe(request, details);
+        return authService.patchMe(request, null, null, details);
     }
 
-    @PatchMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<AuthMe>> patchProfileImage(
-            @RequestPart("file") MultipartFile profileImage,
+    @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<AuthMe>> patchMeMultipart(
+            @RequestPart(value = "request", required = false) @Valid AuthMeRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "profileBackgroundImage", required = false) MultipartFile profileBackgroundImage,
             @AuthenticationPrincipal CustomUserDetails details) {
-        return authService.patchProfileImage(profileImage, details);
+        return authService.patchMe(request, profileImage, profileBackgroundImage, details);
     }
 }

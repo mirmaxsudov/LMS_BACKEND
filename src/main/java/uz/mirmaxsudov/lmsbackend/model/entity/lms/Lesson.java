@@ -38,4 +38,10 @@ public class Lesson extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LessonStatus status;
+
+    @JoinColumn(name = "schedule_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Schedule schedule;
+
+    private boolean isCancelled;
 }

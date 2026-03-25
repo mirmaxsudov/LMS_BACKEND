@@ -3,6 +3,7 @@ package uz.mirmaxsudov.lmsbackend.model.entity.lms;
 import jakarta.persistence.*;
 import lombok.*;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
+import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
 
 import java.time.LocalDate;
@@ -44,4 +45,12 @@ public class Group extends BaseEntity {
 
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Schedule> schedules = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id", nullable = false)
+    private TeacherProfile teacher;
 }
