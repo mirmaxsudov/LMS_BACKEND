@@ -51,6 +51,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserByEmailWithAuthorities(String email) {
+        return userRepository.findByEmailWithAuthorities(email);
+    }
+
+    @Override
     public ResponseEntity<ApiPaginateResponse<List<UserPreview>>> getAll(
             int page,
             int size,
@@ -80,8 +85,8 @@ public class UserServiceImpl implements UserService {
                         .email(user.getEmail())
                         .phoneNumber(user.getPhoneNumber())
                         .status(user.getStatus())
-                        .profileImageUrl(user.getProfileImageAttachment() == null ? null : user.getProfileImageAttachment().getUrl())
-                        .profileBackgroundUrl(user.getProfileBackgroundAttachment() == null ? null : user.getProfileBackgroundAttachment().getUrl())
+                        .profileImageUrl(user.getProfileImage() == null ? null : user.getProfileImage().getUrl())
+                        .profileBackgroundUrl(user.getProfileBackgroundImage() == null ? null : user.getProfileBackgroundImage().getUrl())
                         .roles(mapRoleNames(user.getRoles()))
                         .build())
                 .toList();
@@ -144,14 +149,12 @@ public class UserServiceImpl implements UserService {
                     .firstName(request.getFirstName().trim())
                     .lastName(request.getLastName().trim())
                     .middleName(request.getMiddleName() == null ? null : request.getMiddleName().trim())
-                    .gender(request.getGender())
-                    .brithDate(request.getBirthDate())
                     .phoneNumber(request.getPhoneNumber().trim())
                     .email(normalizedEmail)
                     .password(passwordEncoder.encode(request.getPassword()))
                     .status(request.getStatus() == null ? UserStatus.ACTIVE : request.getStatus())
-                    .profileImageAttachment(profileImageAttachment)
-                    .profileBackgroundAttachment(profileBackgroundImageAttachment)
+                    .profileImage(profileImageAttachment)
+                    .profileBackgroundImage(profileBackgroundImageAttachment)
                     .roles(roles)
                     .build();
 

@@ -1,11 +1,17 @@
 package uz.mirmaxsudov.lmsbackend.model.entity.lms;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
-import uz.mirmaxsudov.lmsbackend.model.enums.lms.LessonStatus;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -13,35 +19,19 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "lessons",
-        indexes = {
-                @Index(name = "idx_lesson_group", columnList = "group_id"),
-                @Index(name = "idx_lesson_date", columnList = "start_time")
-        })
+@Table(name = "lessons")
 public class Lesson extends BaseEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
-    private Group group;
+    @JoinColumn(name = "section_id", nullable = false)
+    private CourseSection section;
 
     @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String topic;
+    private String content;
 
-    @Column(nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(nullable = false)
-    private LocalDateTime endTime;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private LessonStatus status;
-
-    @JoinColumn(name = "schedule_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Schedule schedule;
-
-    private boolean isCancelled;
+    @Column(name = "duration", nullable = false)
+    private Integer durationInMinutes;
 }

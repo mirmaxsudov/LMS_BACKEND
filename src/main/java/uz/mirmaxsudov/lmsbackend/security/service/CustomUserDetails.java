@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
+import uz.mirmaxsudov.lmsbackend.service.base.UserService;
 
 import java.util.*;
 

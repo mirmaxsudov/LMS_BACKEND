@@ -4,9 +4,8 @@ public enum PermissionCategory {
     SYSTEM,
     USER,
     COURSE,
-    QUIZ,
-    FILE,
-    CHAT,
-    REPORT,
-    SETTINGS;
+    GROUP,
+    LESSON,
+    ATTENDANCE,
+    ENROLLMENT
 }

@@ -137,10 +137,10 @@ public class AuthServiceImpl implements AuthService {
         if (profileImage.isEmpty())
             throw new CustomBadRequestException("Profile image file must not be empty");
 
-        Attachment previousAttachment = user.getProfileImageAttachment();
+        Attachment previousAttachment = user.getProfileImage();
         Attachment uploadedAttachment = attachmentService.upload(profileImage, AttachmentType.IMAGE, user);
 
-        user.setProfileImageAttachment(uploadedAttachment);
+        user.setProfileImage(uploadedAttachment);
 
         if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
             attachmentService.delete(previousAttachment.getId());
@@ -150,10 +150,10 @@ public class AuthServiceImpl implements AuthService {
         if (profileBackgroundImage.isEmpty())
             throw new CustomBadRequestException("Profile background image file must not be empty");
 
-        Attachment previousAttachment = user.getProfileBackgroundAttachment();
+        Attachment previousAttachment = user.getProfileBackgroundImage();
         Attachment uploadedAttachment = attachmentService.upload(profileBackgroundImage, AttachmentType.IMAGE, user);
 
-        user.setProfileBackgroundAttachment(uploadedAttachment);
+        user.setProfileBackgroundImage(uploadedAttachment);
 
         if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
             attachmentService.delete(previousAttachment.getId());

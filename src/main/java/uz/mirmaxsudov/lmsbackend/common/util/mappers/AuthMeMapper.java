@@ -14,20 +14,18 @@ public final class AuthMeMapper {
                 .middleName(user.getMiddleName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
-                .gender(user.getGender())
                 .status(user.getStatus())
-                .birthDate(user.getBrithDate() == null ? null : user.getBrithDate().toString())
                 .profileImageAttachmentId(
-                        user.getProfileImageAttachment() == null ? null : user.getProfileImageAttachment().getId()
+                        user.getProfileImage() == null ? null : user.getProfileImage().getId()
                 )
                 .profileImageUrl(
-                        user.getProfileImageAttachment() == null ? null : user.getProfileImageAttachment().getUrl()
+                        user.getProfileImage() == null ? null : user.getProfileImage().getUrl()
                 )
                 .profileBackgroundAttachmentId(
-                        user.getProfileBackgroundAttachment() == null ? null : user.getProfileBackgroundAttachment().getId()
+                        user.getProfileBackgroundImage() == null ? null : user.getProfileBackgroundImage().getId()
                 )
                 .profileBackgroundUrl(
-                        user.getProfileBackgroundAttachment() == null ? null : user.getProfileBackgroundAttachment().getUrl()
+                        user.getProfileBackgroundImage() == null ? null : user.getProfileBackgroundImage().getUrl()
                 )
                 .roles(user.getRoles())
                 .build();

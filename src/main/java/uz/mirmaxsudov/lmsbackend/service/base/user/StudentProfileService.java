@@ -14,7 +14,7 @@ import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService;
 import java.util.List;
 
 public interface StudentProfileService extends BaseCRUDService<StudentProfile> {
-    ResponseEntity<ApiPaginateResponse<List<StudentProfileResponse>>> getStudentProfilePaginateResponse(int page, int size, String search, StudentStatus status);
+    ResponseEntity<ApiPaginateResponse<List<StudentProfileResponse>>>   getStudentProfilePaginateResponse(int page, int size, String search, StudentStatus status);
 
     ResponseEntity<ApiResponse<StudentProfileResponse>> postStudentProfile(@Valid StudentProfileRequest request, CustomUserDetails details);
 }

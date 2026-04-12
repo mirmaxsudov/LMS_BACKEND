@@ -12,28 +12,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
-import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
 
 @Entity
-@Table(name = "groups")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Group extends BaseEntity {
-
-    @Column(nullable = false)
-    private String groupName;
+@Table(name = "course_section")
+public class CourseSection extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacher_id", nullable = false)
-    private TeacherProfile teacher;
-
     @Column(nullable = false)
-    private Integer capacity;
+    private String title;
+
+    @Column(name = "orderIndex", nullable = false)
+    private Integer orderIndex;
 }

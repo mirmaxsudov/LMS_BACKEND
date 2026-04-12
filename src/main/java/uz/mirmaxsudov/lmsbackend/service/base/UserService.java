@@ -19,6 +19,7 @@ import java.util.UUID;
 
 public interface UserService {
     Optional<User> getUserByEmail(String email);
+    Optional<User> getUserByEmailWithAuthorities(String email);
 
     ResponseEntity<ApiPaginateResponse<List<UserPreview>>> getAll(
             int page,

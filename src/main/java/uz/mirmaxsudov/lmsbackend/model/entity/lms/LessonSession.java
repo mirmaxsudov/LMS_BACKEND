@@ -14,32 +14,34 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
-import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile;
-import uz.mirmaxsudov.lmsbackend.model.enums.lms.EnrollmentStatus;
+import uz.mirmaxsudov.lmsbackend.model.enums.lms.LessonSessionStatus;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "enrollments")
+@Table(name = "lesson_sessions")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Enrollment extends BaseEntity {
+public class LessonSession extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
-    private StudentProfile student;
+    @JoinColumn(name = "group_id", nullable = false)
+    private Group group;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "lesson_id", nullable = false)
+    private Lesson lesson;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EnrollmentStatus status;
-
-    @Column(name = "enrolled_at", nullable = false)
-    private LocalDateTime enrolledAt;
+    private LessonSessionStatus status;
 }

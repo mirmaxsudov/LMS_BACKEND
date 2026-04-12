@@ -49,15 +49,10 @@ public class AttachmentServiceImpl implements AttachmentService {
         }
 
         Attachment attachment = Attachment.builder()
-                .originalName(originalName)
                 .storedName(storedName)
                 .path(objectKey)
                 .url(buildObjectUrl(objectKey))
-                .size(file.getSize())
-                .contentType(contentType)
                 .extension(extension)
-                .type(resolvedType)
-                .uploadedBy(uploadedBy)
                 .build();
 
         return attachmentRepository.save(attachment);
@@ -78,16 +73,10 @@ public class AttachmentServiceImpl implements AttachmentService {
     public AttachmentResponse toResponse(Attachment attachment) {
         return AttachmentResponse.builder()
                 .id(attachment.getId())
-                .originalName(attachment.getOriginalName())
                 .storedName(attachment.getStoredName())
                 .path(attachment.getPath())
                 .url(attachment.getUrl())
-                .size(attachment.getSize())
-                .contentType(attachment.getContentType())
                 .extension(attachment.getExtension())
-                .checksum(attachment.getChecksum())
-                .type(attachment.getType())
-                .uploadedById(attachment.getUploadedBy() == null ? null : attachment.getUploadedBy().getId())
                 .createdAt(attachment.getCreatedAt())
                 .build();
     }

@@ -40,6 +40,7 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
         int normalizedPage = Math.max(page - 1, 0);
         int normalizedSize = size <= 0 ? 10 : size;
         Pageable pageable = PageableBuilder.build(normalizedPage, normalizedSize);
+
         Specification<StudentProfile> filter = StudentProfileSpecification.filter(StudentProfileFilter.builder()
                 .search(search)
                 .status(status)

@@ -1,25 +1,36 @@
 package uz.mirmaxsudov.lmsbackend.model.entity.lms;
 
-import jakarta.persistence.*;
-import lombok.*;
-import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
+import uz.mirmaxsudov.lmsbackend.model.enums.lms.CourseLevel;
 
 @Entity
+@Table(name = "courses")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "courses")
 public class Course extends BaseEntity {
+
     @Column(nullable = false)
-    private String name;
-    @Column(nullable = false, length = 1000, columnDefinition = "TEXT")
+    private String title;
+
     private String description;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean isActive;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_id", nullable = false)
-    private User createdBy;
+    private CourseLevel level;
+
+    @Column(name = "duration", nullable = false)
+    private Integer durationInMinutes;
 }

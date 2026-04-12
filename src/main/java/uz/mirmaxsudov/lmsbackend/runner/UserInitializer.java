@@ -40,7 +40,6 @@
 //                        .status(UserStatus.ACTIVE)
 //                        .firstName("Abdurahmon")
 //                        .lastName("Mirmaxsudov")
-//                        .gender(Gender.MALE)
 //                        .middleName("MirBahodir")
 //                        .password(passwordEncoder.encode(SUPER_ADMIN_PASSWORD))
 //                        .roles(new HashSet<>())
