@@ -5,6 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,14 +27,20 @@ import uz.mirmaxsudov.lmsbackend.model.enums.lms.CourseLevel;
 public class Course extends BaseEntity {
 
     @Column(nullable = false)
+    @NotBlank
+    @Size(max = 255)
     private String title;
 
+    @Size(max = 3000)
     private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private CourseLevel level;
 
     @Column(name = "duration", nullable = false)
+    @NotNull
+    @Positive
     private Integer durationInMinutes;
 }
