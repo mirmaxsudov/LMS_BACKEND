@@ -18,29 +18,28 @@ import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.CourseLevel;
 
 @Entity
-@Table(name = "courses")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "courses")
 public class Course extends BaseEntity {
-
-    @Column(nullable = false)
     @NotBlank
     @Size(max = 255)
+    @Column(nullable = false)
     private String title;
 
     @Size(max = 3000)
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CourseLevel level;
 
-    @Column(name = "duration", nullable = false)
     @NotNull
     @Positive
+    @Column(name = "duration", nullable = false)
     private Integer durationInMinutes;
 }
