@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.repository.lms;
+package uz.mirmaxsudov.lmsbackend.repository.lms.course;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +11,7 @@ public class CourseSpecification {
     public static Specification<Course> filter(CourseFilter filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("deleted"), Boolean.FALSE));
 
             if (filter.getLevel() != null)
                 predicates.add(cb.equal(root.get("level"), filter.getLevel()));

@@ -1,4 +1,4 @@
-package uz.mirmaxsudov.lmsbackend.repository.lms;
+package uz.mirmaxsudov.lmsbackend.repository.lms.course;
 
 import lombok.Builder;
 import lombok.Getter;

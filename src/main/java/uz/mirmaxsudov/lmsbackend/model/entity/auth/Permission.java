@@ -19,12 +19,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "permissions")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "permissions")
 public class Permission extends BaseEntity {
 
     @Column(nullable = false)

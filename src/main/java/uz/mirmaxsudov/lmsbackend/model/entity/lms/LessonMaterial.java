@@ -27,13 +27,13 @@ import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
 @AllArgsConstructor
 public class LessonMaterial extends BaseEntity {
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)
-    @NotNull
     private Lesson lesson;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attachment_id", nullable = false)
-    @NotNull
     private Attachment attachment;
 }

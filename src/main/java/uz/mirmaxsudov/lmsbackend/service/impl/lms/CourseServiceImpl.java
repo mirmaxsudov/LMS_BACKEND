@@ -15,9 +15,9 @@ import uz.mirmaxsudov.lmsbackend.model.request.lms.CourseUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.CourseResponse;
-import uz.mirmaxsudov.lmsbackend.repository.lms.CourseFilter;
-import uz.mirmaxsudov.lmsbackend.repository.lms.CourseRepository;
-import uz.mirmaxsudov.lmsbackend.repository.lms.CourseSpecification;
+import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseFilter;
+import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseRepository;
+import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseSpecification;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.CourseService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
@@ -70,8 +70,7 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
 
     @Override
     public ResponseEntity<ApiResponse<CourseResponse>> getByIdResponse(UUID id) {
-        Course course = repository.findById(id)
-                .orElseThrow(() -> new CustomNotFoundException("Course not found with id: " + id));
+        Course course = findActiveCourse(id);
 
         return ResponseEntity.ok(ApiResponse.<CourseResponse>builder()
                 .success(true)
@@ -100,8 +99,7 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
 
     @Override
     public ResponseEntity<ApiResponse<CourseResponse>> updateCourse(UUID id, CourseUpdateRequest request) {
-        Course existingCourse = repository.findById(id)
-                .orElseThrow(() -> new CustomNotFoundException("Course not found with id: " + id));
+        Course existingCourse = findActiveCourse(id);
 
         existingCourse.setTitle(request.getTitle().trim());
         existingCourse.setDescription(normalizeDescription(request.getDescription()));
@@ -119,8 +117,7 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
 
     @Override
     public ResponseEntity<ApiResponse<Void>> deleteCourse(UUID id) {
-        Course existingCourse = repository.findById(id)
-                .orElseThrow(() -> new CustomNotFoundException("Course not found with id: " + id));
+        Course existingCourse = findActiveCourse(id);
 
         existingCourse.setDeleted(true);
         existingCourse.setDeletedAt(LocalDateTime.now());
@@ -140,6 +137,11 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
                 .level(course.getLevel())
                 .durationInMinutes(course.getDurationInMinutes())
                 .build();
+    }
+
+    private Course findActiveCourse(UUID id) {
+        return repository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new CustomNotFoundException("Course not found with id: " + id));
     }
 
     private String normalizeDescription(String description) {

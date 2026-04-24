@@ -12,6 +12,7 @@ public class ParentProfileSpecification {
     public static Specification<ParentProfile> filter(ParentProfileFilter filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("deleted"), Boolean.FALSE));
 
             if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
                 var userJoin = root.join("user");

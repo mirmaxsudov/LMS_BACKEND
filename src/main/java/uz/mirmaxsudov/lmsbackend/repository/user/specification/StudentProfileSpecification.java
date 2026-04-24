@@ -12,6 +12,7 @@ public class StudentProfileSpecification {
     public static Specification<StudentProfile> filter(StudentProfileFilter filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("deleted"), Boolean.FALSE));
 
             if (filter.getStatus() != null)
                 predicates.add(cb.equal(root.get("status"), filter.getStatus()));

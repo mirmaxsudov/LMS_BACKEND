@@ -21,21 +21,27 @@ public abstract class BaseCRUDServiceImpl<T extends BaseEntity, R extends JpaRep
 
     @Override
     public Optional<T> getById(UUID id) {
-        return repository.findById(id);
+        return repository.findById(id)
+                .filter(entity -> !entity.isDeleted());
     }
 
     @Override
     public List<T> getAll() {
-        return repository.findAll();
+        return repository.findAll().stream()
+                .filter(entity -> !entity.isDeleted())
+                .toList();
     }
 
     @Override
     public T update(UUID id, T entity) {
-        return repository.findById(id).map(existing -> {
-            entity.setId(id);
-            entity.setCreatedAt(existing.getCreatedAt());
-            return repository.save(entity);
-        }).orElseThrow(() -> new RuntimeException("Entity not found"));
+        return repository.findById(id)
+                .filter(existing -> !existing.isDeleted())
+                .map(existing -> {
+                    entity.setId(id);
+                    entity.setCreatedAt(existing.getCreatedAt());
+                    return repository.save(entity);
+                })
+                .orElseThrow(() -> new RuntimeException("Entity not found"));
     }
 
     @Override
@@ -45,10 +51,12 @@ public abstract class BaseCRUDServiceImpl<T extends BaseEntity, R extends JpaRep
 
     @Override
     public void softDelete(UUID id) {
-        repository.findById(id).ifPresent(entity -> {
-            entity.setDeleted(true);
-            entity.setDeletedAt(LocalDateTime.now());
-            repository.save(entity);
-        });
+        repository.findById(id)
+                .filter(entity -> !entity.isDeleted())
+                .ifPresent(entity -> {
+                    entity.setDeleted(true);
+                    entity.setDeletedAt(LocalDateTime.now());
+                    repository.save(entity);
+                });
     }
 }

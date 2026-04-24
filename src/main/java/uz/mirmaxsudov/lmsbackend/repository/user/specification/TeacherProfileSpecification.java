@@ -12,6 +12,7 @@ public class TeacherProfileSpecification {
     public static Specification<TeacherProfile> filter(TeacherProfileFilter filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("deleted"), Boolean.FALSE));
 
             if (filter.getPosition() != null)
                 predicates.add(cb.equal(root.get("position"), filter.getPosition()));

@@ -26,36 +26,36 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "groups")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "groups")
 public class Group extends BaseEntity {
 
     @Column(nullable = false)
     @NotBlank
     private String groupName;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
-    @NotNull
     private Course course;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
-    @NotNull
     private TeacherProfile teacher;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private GroupStatus status;
 
-    @Column(nullable = false)
     @NotNull
     @Positive
+    @Column(nullable = false)
     private Integer capacity;
 
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
