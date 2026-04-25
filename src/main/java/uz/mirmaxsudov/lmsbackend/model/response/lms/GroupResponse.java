@@ -3,7 +3,7 @@ package uz.mirmaxsudov.lmsbackend.model.response.lms;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import uz.mirmaxsudov.lmsbackend.model.response.auth.AuthMe;
+import uz.mirmaxsudov.lmsbackend.model.response.course.GroupTeacherResponse;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public class GroupResponse {
     private UUID courseId;
     private String courseName;
     private UUID teacherId;
-    private AuthMe teacher;
+    private GroupTeacherResponse teacher;
     private Integer capacity;
     private boolean active;
     private int currentStudents;

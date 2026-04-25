@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
-import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.TeacherMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
@@ -175,7 +175,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
                 .courseId(group.getCourse() == null ? null : group.getCourse().getId())
                 .courseName(group.getCourse() == null ? null : group.getCourse().getTitle())
                 .teacherId(group.getTeacher() == null ? null : group.getTeacher().getId())
-                .teacher(group.getTeacher() == null ? null : AuthMeMapper.toResponse(group.getTeacher().getUser()))
+                .teacher(group.getTeacher() == null ? null : TeacherMapper.toGroupTeacherResponse(group.getTeacher().getUser()))
                 .capacity(group.getCapacity())
                 .active(group.getStatus() == GroupStatus.ACTIVE)
                 .currentStudents(group.getStudents() == null ? 0 : group.getStudents().size())
@@ -211,10 +211,10 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
         boolean exists = excludedGroupId == null
                 ? repository.existsByGroupNameIgnoreCaseAndCourseIdAndDeletedFalse(groupName, courseId)
                 : repository.existsByGroupNameIgnoreCaseAndCourseIdAndIdNotAndDeletedFalse(
-                        groupName,
-                        courseId,
-                        excludedGroupId
-                );
+                groupName,
+                courseId,
+                excludedGroupId
+        );
 
         if (exists)
             throw new CustomConflictException("Group with this name already exists in the selected course");
