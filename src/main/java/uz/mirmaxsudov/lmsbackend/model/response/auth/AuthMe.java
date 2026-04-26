@@ -14,6 +14,7 @@ import java.util.UUID;
 @Setter
 @Builder
 public class AuthMe {
+    private UUID id;
     private String firstName;
     private String lastName;
     private String middleName;

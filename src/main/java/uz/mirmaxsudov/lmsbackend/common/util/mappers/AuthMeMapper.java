@@ -9,6 +9,7 @@ public final class AuthMeMapper {
             return AuthMe.builder().build();
 
         return AuthMe.builder()
+                .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .middleName(user.getMiddleName())

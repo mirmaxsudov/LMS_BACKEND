@@ -7,10 +7,14 @@ import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @Builder
 public class GroupTeacherResponse {
+    private UUID userId;
+    private UUID teacherId;
     private String firstName;
     private String lastName;
     private String middleName;

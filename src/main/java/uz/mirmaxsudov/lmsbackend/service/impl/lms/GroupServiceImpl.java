@@ -144,6 +144,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
         existingGroup.setTeacher(teacher);
         existingGroup.setStatus(toStatus(request.getActive()));
         existingGroup.setCapacity(request.getCapacity());
+        existingGroup.setStatus(request.getStatus());
 
         Group updatedGroup = repository.save(existingGroup);
 
@@ -174,9 +175,9 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
                 .name(group.getGroupName())
                 .courseId(group.getCourse() == null ? null : group.getCourse().getId())
                 .courseName(group.getCourse() == null ? null : group.getCourse().getTitle())
-                .teacherId(group.getTeacher() == null ? null : group.getTeacher().getId())
-                .teacher(group.getTeacher() == null ? null : TeacherMapper.toGroupTeacherResponse(group.getTeacher().getUser()))
+                .teacher(group.getTeacher() == null ? null : TeacherMapper.toGroupTeacherResponse(group.getTeacher().getUser(), group.getTeacher()))
                 .capacity(group.getCapacity())
+                .status(group.getStatus())
                 .active(group.getStatus() == GroupStatus.ACTIVE)
                 .currentStudents(group.getStudents() == null ? 0 : group.getStudents().size())
                 .build();

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
 
 import java.util.UUID;
 
@@ -25,4 +26,7 @@ public class GroupUpdateRequest {
 
     @NotNull(message = "Active flag is required")
     private Boolean active;
+
+    @NotNull(message = "Status is required")
+    private GroupStatus status;
 }

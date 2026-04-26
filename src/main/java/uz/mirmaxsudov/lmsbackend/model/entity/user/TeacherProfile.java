@@ -24,7 +24,6 @@ import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeacherProfile extends BaseEntity {
-
     @Enumerated(EnumType.STRING)
     private TeacherPosition position;
 

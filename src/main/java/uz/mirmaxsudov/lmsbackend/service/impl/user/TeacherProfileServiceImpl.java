@@ -48,8 +48,9 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
         Page<TeacherProfile> teacherProfiles = repository.findAll(filter, pageable);
         List<TeacherProfileResponse> results = teacherProfiles.getContent().stream()
                 .map(teacherProfile -> TeacherProfileResponse.builder()
+                        .teacherId(teacherProfile.getId())
                         .position(teacherProfile.getPosition())
-                        .baseData(AuthMeMapper.toResponse(teacherProfile.getUser()))
+                        .user(AuthMeMapper.toResponse(teacherProfile.getUser()))
                         .build())
                 .toList();
 
@@ -80,8 +81,9 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
                 .success(true)
                 .message("Teacher profile created successfully")
                 .data(TeacherProfileResponse.builder()
+                        .teacherId(newTeacherProfile.getId())
                         .position(newTeacherProfile.getPosition())
-                        .baseData(AuthMeMapper.toResponse(newTeacherProfile.getUser()))
+                        .user(AuthMeMapper.toResponse(newTeacherProfile.getUser()))
                         .build())
                 .build());
     }
