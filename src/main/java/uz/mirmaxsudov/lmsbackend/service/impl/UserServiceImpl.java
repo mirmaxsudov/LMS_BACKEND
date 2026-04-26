@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.UserMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
@@ -77,18 +78,7 @@ public class UserServiceImpl implements UserService {
 
         Page<User> users = userRepository.findAll(specification, pageable);
         List<UserPreview> results = users.getContent().stream()
-                .map(user -> UserPreview.builder()
-                        .id(user.getId())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .middleName(user.getMiddleName())
-                        .email(user.getEmail())
-                        .phoneNumber(user.getPhoneNumber())
-                        .status(user.getStatus())
-                        .profileImageUrl(user.getProfileImage() == null ? null : user.getProfileImage().getUrl())
-                        .profileBackgroundUrl(user.getProfileBackgroundImage() == null ? null : user.getProfileBackgroundImage().getUrl())
-                        .roles(mapRoleNames(user.getRoles()))
-                        .build())
+                .map(UserMapper::toPreview)
                 .toList();
 
         return ResponseEntity.ok(ApiPaginateResponse.<List<UserPreview>>builder()
@@ -172,16 +162,5 @@ public class UserServiceImpl implements UserService {
                 .message("User created successfully")
                 .data(AuthMeMapper.toResponse(savedUser))
                 .build());
-    }
-
-    private Set<String> mapRoleNames(Set<Role> roles) {
-        if (roles == null || roles.isEmpty()) {
-            return Set.of();
-        }
-
-        return roles.stream()
-                .map(Role::getName)
-                .filter(name -> name != null && !name.isBlank())
-                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
     }
 }

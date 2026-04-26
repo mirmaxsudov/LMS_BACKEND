@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.GroupMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.TeacherMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
@@ -76,7 +77,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
 
         Page<Group> groups = repository.findAll(filter, pageable);
         List<GroupResponse> results = groups.getContent().stream()
-                .map(this::toResponse)
+                .map(GroupMapper::toResponse)
                 .toList();
 
         return ResponseEntity.ok(ApiPaginateResponse.<List<GroupResponse>>builder()
@@ -97,7 +98,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
         return ResponseEntity.ok(ApiResponse.<GroupResponse>builder()
                 .success(true)
                 .message("Group fetched successfully")
-                .data(toResponse(group))
+                .data(GroupMapper.toResponse(group))
                 .build());
     }
 
@@ -123,7 +124,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
         return ResponseEntity.ok(ApiResponse.<GroupResponse>builder()
                 .success(true)
                 .message("Group created successfully")
-                .data(toResponse(savedGroup))
+                .data(GroupMapper.toResponse(savedGroup))
                 .build());
     }
 
@@ -151,7 +152,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
         return ResponseEntity.ok(ApiResponse.<GroupResponse>builder()
                 .success(true)
                 .message("Group updated successfully")
-                .data(toResponse(updatedGroup))
+                .data(GroupMapper.toResponse(updatedGroup))
                 .build());
     }
 
@@ -167,20 +168,6 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
                 .success(true)
                 .message("Group deleted successfully")
                 .build());
-    }
-
-    private GroupResponse toResponse(Group group) {
-        return GroupResponse.builder()
-                .id(group.getId())
-                .name(group.getGroupName())
-                .courseId(group.getCourse() == null ? null : group.getCourse().getId())
-                .courseName(group.getCourse() == null ? null : group.getCourse().getTitle())
-                .teacher(group.getTeacher() == null ? null : TeacherMapper.toGroupTeacherResponse(group.getTeacher().getUser(), group.getTeacher()))
-                .capacity(group.getCapacity())
-                .status(group.getStatus())
-                .active(group.getStatus() == GroupStatus.ACTIVE)
-                .currentStudents(group.getStudents() == null ? 0 : group.getStudents().size())
-                .build();
     }
 
     private Course findCourse(UUID courseId) {

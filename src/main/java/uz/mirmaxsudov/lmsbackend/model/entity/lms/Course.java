@@ -1,9 +1,12 @@
 package uz.mirmaxsudov.lmsbackend.model.entity.lms;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +19,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.CourseLevel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -42,4 +48,9 @@ public class Course extends BaseEntity {
     @Positive
     @Column(name = "duration", nullable = false)
     private Integer durationInMinutes;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    private List<CourseSection> sections = new ArrayList<>();
 }

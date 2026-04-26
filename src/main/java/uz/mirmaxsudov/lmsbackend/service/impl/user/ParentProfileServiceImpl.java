@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.ParentMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
@@ -56,10 +57,7 @@ public class ParentProfileServiceImpl extends BaseCRUDServiceImpl<ParentProfile,
 
         Page<ParentProfile> parentProfiles = repository.findAll(filter, pageable);
         List<ParentProfileResponse> results = parentProfiles.getContent().stream()
-                .map(parentProfile -> ParentProfileResponse.builder()
-                        .baseData(AuthMeMapper.toResponse(parentProfile.getUser()))
-                        .studentsCount(parentProfile.getStudents() == null ? 0 : parentProfile.getStudents().size())
-                        .build())
+                .map(ParentMapper::toResponse)
                 .toList();
 
         return ResponseEntity.ok(
@@ -95,10 +93,7 @@ public class ParentProfileServiceImpl extends BaseCRUDServiceImpl<ParentProfile,
         return ResponseEntity.ok(ApiResponse.<ParentProfileResponse>builder()
                 .success(true)
                 .message("Parent profile created successfully")
-                .data(ParentProfileResponse.builder()
-                        .baseData(AuthMeMapper.toResponse(profile.getUser()))
-                        .studentsCount(profile.getStudents() == null ? 0 : profile.getStudents().size())
-                        .build())
+                .data(ParentMapper.toResponse(profile))
                 .build());
     }
 

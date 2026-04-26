@@ -176,6 +176,11 @@ Base API prefix for REST modules: `/api/v1`
   - `/api/v1/teacher`
   - `/api/v1/student`
   - `/api/v1/parent`
+- LMS Core
+  - `/api/v1/courses`
+  - `/api/v1/groups`
+  - `/api/v1/course-sections`
+  - `/api/v1/lessons`
 - Attachments
   - `POST /api/v1/attachments`
   - `POST /api/v1/attachments/bulk`
@@ -199,3 +204,30 @@ Base API prefix for REST modules: `/api/v1`
 - Security whitelist includes Swagger and WebSocket endpoints.
 - `DataInitializer` and `UserInitializer` classes are currently commented out.
 - Before production use, move sensitive values (DB, SMTP, JWT secrets) out of repository files and inject via environment/secrets manager.
+
+## Sample Requests
+
+### Course Section
+
+#### Create Section
+**POST** `/api/v1/course-sections`
+```json
+{
+  "title": "Module 1: Getting Started",
+  "courseId": "550e8400-e29b-41d4-a716-446655440000",
+  "orderIndex": 1
+}
+```
+
+### Lesson
+
+#### Create Lesson
+**POST** `/api/v1/lessons`
+```json
+{
+  "title": "Setting Up Environment",
+  "sectionId": "660f9500-f30c-52e5-b827-557766551111",
+  "content": "Step-by-step guide...",
+  "durationInMinutes": 30
+}
+```

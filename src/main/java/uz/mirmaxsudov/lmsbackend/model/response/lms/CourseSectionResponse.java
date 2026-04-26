@@ -3,7 +3,6 @@ package uz.mirmaxsudov.lmsbackend.model.response.lms;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import uz.mirmaxsudov.lmsbackend.model.enums.lms.CourseLevel;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,11 +10,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-public class CourseResponse {
+public class CourseSectionResponse {
     private UUID id;
     private String title;
-    private String description;
-    private CourseLevel level;
-    private Integer durationInMinutes;
-    private List<CourseSectionResponse> sections;
+    private Integer orderIndex;
+    private UUID courseId;
+    private List<LessonResponse> lessons;
 }

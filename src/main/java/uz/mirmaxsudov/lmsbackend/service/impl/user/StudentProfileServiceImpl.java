@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.StudentMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
@@ -48,11 +49,7 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
 
         Page<StudentProfile> studentProfiles = repository.findAll(filter, pageable);
         List<StudentProfileResponse> results = studentProfiles.getContent().stream()
-                .map(studentProfile -> StudentProfileResponse.builder()
-                        .baseData(AuthMeMapper.toResponse(studentProfile.getUser()))
-                        .studentId(studentProfile.getStudentId())
-                        .status(studentProfile.getStatus())
-                        .build())
+                .map(StudentMapper::toResponse)
                 .toList();
 
         return ResponseEntity.ok(
@@ -87,11 +84,7 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
         return ResponseEntity.ok(ApiResponse.<StudentProfileResponse>builder()
                 .success(true)
                 .message("Student profile created successfully")
-                .data(StudentProfileResponse.builder()
-                        .baseData(AuthMeMapper.toResponse(profile.getUser()))
-                        .studentId(profile.getStudentId())
-                        .status(profile.getStatus())
-                        .build())
+                .data(StudentMapper.toResponse(profile))
                 .build());
     }
 }

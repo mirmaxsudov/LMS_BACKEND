@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.CourseMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Course;
@@ -15,6 +16,8 @@ import uz.mirmaxsudov.lmsbackend.model.request.lms.CourseUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.CourseResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.CourseSectionResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.LessonResponse;
 import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseFilter;
 import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseRepository;
 import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseSpecification;
@@ -54,7 +57,7 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
 
         Page<Course> courses = repository.findAll(filter, pageable);
         List<CourseResponse> results = courses.getContent().stream()
-                .map(this::toResponse)
+                .map(CourseMapper::toResponse)
                 .toList();
 
         return ResponseEntity.ok(ApiPaginateResponse.<List<CourseResponse>>builder()
@@ -75,7 +78,7 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
         return ResponseEntity.ok(ApiResponse.<CourseResponse>builder()
                 .success(true)
                 .message("Course fetched successfully")
-                .data(toResponse(course))
+                .data(CourseMapper.toResponse(course))
                 .build());
     }
 
@@ -93,7 +96,7 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
         return ResponseEntity.ok(ApiResponse.<CourseResponse>builder()
                 .success(true)
                 .message("Course created successfully")
-                .data(toResponse(savedCourse))
+                .data(CourseMapper.toResponse(savedCourse))
                 .build());
     }
 
@@ -111,7 +114,7 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
         return ResponseEntity.ok(ApiResponse.<CourseResponse>builder()
                 .success(true)
                 .message("Course updated successfully")
-                .data(toResponse(updatedCourse))
+                .data(CourseMapper.toResponse(updatedCourse))
                 .build());
     }
 
@@ -127,16 +130,6 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
                 .success(true)
                 .message("Course deleted successfully")
                 .build());
-    }
-
-    private CourseResponse toResponse(Course course) {
-        return CourseResponse.builder()
-                .id(course.getId())
-                .title(course.getTitle())
-                .description(course.getDescription())
-                .level(course.getLevel())
-                .durationInMinutes(course.getDurationInMinutes())
-                .build();
     }
 
     private Course findActiveCourse(UUID id) {

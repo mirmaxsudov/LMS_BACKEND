@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.TeacherMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
@@ -47,11 +48,7 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
 
         Page<TeacherProfile> teacherProfiles = repository.findAll(filter, pageable);
         List<TeacherProfileResponse> results = teacherProfiles.getContent().stream()
-                .map(teacherProfile -> TeacherProfileResponse.builder()
-                        .teacherId(teacherProfile.getId())
-                        .position(teacherProfile.getPosition())
-                        .user(AuthMeMapper.toResponse(teacherProfile.getUser()))
-                        .build())
+                .map(TeacherMapper::toResponse)
                 .toList();
 
         return ResponseEntity.ok(
@@ -80,11 +77,7 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
         return ResponseEntity.ok(ApiResponse.<TeacherProfileResponse>builder()
                 .success(true)
                 .message("Teacher profile created successfully")
-                .data(TeacherProfileResponse.builder()
-                        .teacherId(newTeacherProfile.getId())
-                        .position(newTeacherProfile.getPosition())
-                        .user(AuthMeMapper.toResponse(newTeacherProfile.getUser()))
-                        .build())
+                .data(TeacherMapper.toResponse(newTeacherProfile))
                 .build());
     }
 }
