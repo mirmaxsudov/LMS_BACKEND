@@ -26,7 +26,6 @@ import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonMaterial extends BaseEntity {
-
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)

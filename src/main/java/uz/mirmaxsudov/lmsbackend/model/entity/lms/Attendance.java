@@ -30,19 +30,18 @@ import uz.mirmaxsudov.lmsbackend.model.enums.lms.AttendanceStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Attendance extends BaseEntity {
-
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    @NotNull
     private StudentProfile student;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_session_id", nullable = false)
-    @NotNull
     private LessonSession lessonSession;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private AttendanceStatus status;
 }

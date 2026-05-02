@@ -22,6 +22,8 @@ public final class GroupMapper {
                 .courseName(group.getCourse() == null ? null : group.getCourse().getTitle())
                 .teacher(group.getTeacher() == null ? null : TeacherMapper.toGroupTeacherResponse(group.getTeacher().getUser(), group.getTeacher()))
                 .capacity(group.getCapacity())
+                .scheduleType(group.getScheduleType())
+                .scheduleDays(group.getScheduleDays())
                 .status(group.getStatus())
                 .active(group.getStatus() == GroupStatus.ACTIVE)
                 .currentStudents(group.getStudents() == null ? 0 : group.getStudents().size())

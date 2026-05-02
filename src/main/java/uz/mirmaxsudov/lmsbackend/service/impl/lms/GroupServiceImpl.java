@@ -14,6 +14,7 @@ import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Course;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
+import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupScheduleType;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupCreateRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupUpdateRequest;
@@ -28,8 +29,11 @@ import uz.mirmaxsudov.lmsbackend.repository.user.TeacherProfileRepository;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.GroupService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -110,6 +114,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
 
         validateDuplicateName(normalizedName, course.getId(), null);
         validateCapacity(request.getCapacity(), 0);
+        Set<DayOfWeek> scheduleDays = normalizeScheduleDays(request.getScheduleType(), request.getScheduleDays());
 
         Group group = Group.builder()
                 .groupName(normalizedName)
@@ -117,6 +122,8 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
                 .teacher(teacher)
                 .status(toStatus(request.getActive()))
                 .capacity(request.getCapacity())
+                .scheduleType(request.getScheduleType())
+                .scheduleDays(scheduleDays)
                 .build();
 
         Group savedGroup = repository.save(group);
@@ -139,12 +146,15 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
 
         validateDuplicateName(normalizedName, course.getId(), existingGroup.getId());
         validateCapacity(request.getCapacity(), currentStudentsCount);
+        Set<DayOfWeek> scheduleDays = normalizeScheduleDays(request.getScheduleType(), request.getScheduleDays());
 
         existingGroup.setGroupName(normalizedName);
         existingGroup.setCourse(course);
         existingGroup.setTeacher(teacher);
         existingGroup.setStatus(toStatus(request.getActive()));
         existingGroup.setCapacity(request.getCapacity());
+        existingGroup.setScheduleType(request.getScheduleType());
+        existingGroup.setScheduleDays(scheduleDays);
         existingGroup.setStatus(request.getStatus());
 
         Group updatedGroup = repository.save(existingGroup);
@@ -232,5 +242,20 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
 
         if (minCapacity != null && maxCapacity != null && minCapacity > maxCapacity)
             throw new CustomBadRequestException("minCapacity must be less than or equal to maxCapacity");
+    }
+
+    private Set<DayOfWeek> normalizeScheduleDays(GroupScheduleType scheduleType, Set<DayOfWeek> scheduleDays) {
+        if (scheduleType == null)
+            throw new CustomBadRequestException("Schedule type is required");
+
+        Set<DayOfWeek> normalizedDays = scheduleDays == null ? new HashSet<>() : new HashSet<>(scheduleDays);
+
+        if (scheduleType == GroupScheduleType.EXACT_DAYS && normalizedDays.isEmpty())
+            throw new CustomBadRequestException("Schedule days are required when schedule type is EXACT_DAYS");
+
+        if (scheduleType != GroupScheduleType.EXACT_DAYS && !normalizedDays.isEmpty())
+            throw new CustomBadRequestException("Schedule days must be empty unless schedule type is EXACT_DAYS");
+
+        return normalizedDays;
     }
 }

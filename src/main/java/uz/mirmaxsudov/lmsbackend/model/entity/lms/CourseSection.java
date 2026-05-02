@@ -30,18 +30,18 @@ import java.util.List;
 @Table(name = "course_section")
 public class CourseSection extends BaseEntity {
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
-    @NotNull
     private Course course;
 
     @Column(nullable = false)
     @NotBlank
     private String title;
 
-    @Column(name = "orderIndex", nullable = false)
-    @NotNull
     @PositiveOrZero
+    @NotNull
+    @Column(name = "orderIndex", nullable = false)
     private Integer orderIndex;
 
     @Builder.Default

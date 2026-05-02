@@ -32,28 +32,27 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LessonSession extends BaseEntity {
-
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
-    @NotNull
     private Group group;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)
-    @NotNull
     private Lesson lesson;
 
-    @Column(name = "start_time", nullable = false)
     @NotNull
+    @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    @Column(name = "end_time", nullable = false)
     @NotNull
+    @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private LessonSessionStatus status;
 
     @AssertTrue(message = "Lesson session end time must be after start time")

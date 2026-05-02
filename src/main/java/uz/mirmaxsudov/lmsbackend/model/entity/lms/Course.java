@@ -50,7 +50,7 @@ public class Course extends BaseEntity {
     private Integer durationInMinutes;
 
     @Builder.Default
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CourseSection> sections = new ArrayList<>();
 }

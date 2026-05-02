@@ -17,21 +17,20 @@ import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 
 @Entity
-@Table(name = "attendance_notes")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "attendance_notes")
 public class AttendanceNote extends BaseEntity {
-
+    @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attendance_id", nullable = false, unique = true)
-    @NotNull
     private Attendance attendance;
 
-    @Column(nullable = false)
     @NotBlank
     @Size(max = 1000)
+    @Column(nullable = false)
     private String note;
 }

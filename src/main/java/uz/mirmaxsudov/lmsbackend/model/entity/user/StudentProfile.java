@@ -32,7 +32,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentProfile extends BaseEntity {
-
     @Column(nullable = false)
     private UUID studentId;
 

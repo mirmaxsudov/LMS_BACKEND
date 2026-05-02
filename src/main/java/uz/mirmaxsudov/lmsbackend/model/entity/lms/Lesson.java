@@ -25,23 +25,22 @@ import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 @AllArgsConstructor
 @Table(name = "lessons")
 public class Lesson extends BaseEntity {
-
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "section_id", nullable = false)
-    @NotNull
     private CourseSection section;
 
-    @Column(nullable = false)
     @NotBlank
     @Size(max = 255)
+    @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
     @Size(max = 20000)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "duration", nullable = false)
     @NotNull
     @Positive
+    @Column(name = "duration", nullable = false)
     private Integer durationInMinutes;
 }

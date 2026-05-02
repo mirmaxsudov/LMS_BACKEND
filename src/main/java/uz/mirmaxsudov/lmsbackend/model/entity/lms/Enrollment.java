@@ -32,23 +32,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Enrollment extends BaseEntity {
-
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    @NotNull
     private StudentProfile student;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
-    @NotNull
     private Course course;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private EnrollmentStatus status;
 
-    @Column(name = "enrolled_at", nullable = false)
     @NotNull
+    @Column(name = "enrolled_at", nullable = false)
     private LocalDateTime enrolledAt;
 }

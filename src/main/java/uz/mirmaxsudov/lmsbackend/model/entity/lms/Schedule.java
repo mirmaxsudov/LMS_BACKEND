@@ -32,23 +32,22 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Schedule extends BaseEntity {
-
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
-    @NotNull
     private Group group;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "day_of_week", nullable = false)
-    @NotNull
     private DayOfWeek dayOfWeek;
 
-    @Column(name = "start_time", nullable = false)
     @NotNull
+    @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
     @NotNull
+    @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
     @AssertTrue(message = "Schedule end time must be after start time")
