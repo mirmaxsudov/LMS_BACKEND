@@ -53,6 +53,7 @@ src/main/java/uz/mirmaxsudov/lmsbackend
 src/main/resources
   |- application.yaml
   |- application-dev.yml
+  |- application-docker.yml
   |- application-prod.yml
   |- jwt.properties
   |- socket.properties
@@ -60,7 +61,7 @@ src/main/resources
 
 ## Configuration
 
-`application.yaml` defines shared defaults, and `application-dev.yml` / `application-prod.yml` define environment-specific settings.
+`application.yaml` defines shared defaults, and `application-dev.yml` / `application-docker.yml` / `application-prod.yml` define environment-specific settings.
 
 ### Main properties used by this project
 
@@ -82,7 +83,91 @@ src/main/resources
   - `TUS_MAX_UPLOAD_SIZE_BYTES` (default: `10737418240` = 10 GiB)
   - `TUS_CHUNK_CLEANUP_ON_COMPLETE` (default: `true`)
 
-## Run Locally
+## Run Locally With Docker
+
+The Docker setup can run the full backend stack or only selected services.
+
+### 1. Prerequisites
+
+- Docker Desktop or Docker Engine with Docker Compose
+
+### 2. Optional environment file
+
+Create a local `.env` from the template if you want to change ports, database credentials, MinIO credentials, or SMTP values:
+
+```bash
+cp .env.example .env
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 3. Run the full stack
+
+```bash
+docker compose up -d --build
+```
+
+This starts:
+
+- `postgres` on `localhost:5432`
+- `minio` API on `localhost:9000`
+- `minio` console on `localhost:9001`
+- `app` on `localhost:8888`
+
+The `minio-init` one-shot service creates the configured bucket, defaulting to `uploads`.
+
+### 4. Run only selected services
+
+Only MinIO:
+
+```bash
+docker compose up -d minio minio-init
+```
+
+Only PostgreSQL:
+
+```bash
+docker compose up -d postgres
+```
+
+PostgreSQL and MinIO without the Java app:
+
+```bash
+docker compose up -d postgres minio minio-init
+```
+
+Java app with its dependencies:
+
+```bash
+docker compose up -d --build app
+```
+
+### 5. Stop services
+
+Stop containers while keeping persisted data:
+
+```bash
+docker compose down
+```
+
+Stop containers and remove Postgres/MinIO volumes:
+
+```bash
+docker compose down -v
+```
+
+### 6. Service URLs
+
+- App base URL: `http://localhost:8888`
+- Swagger UI: `http://localhost:8888/swagger-ui/index.html`
+- MinIO console: `http://localhost:9001`
+- Default MinIO login: `minioadmin` / `minioadmin`
+
+## Run Locally Without Docker
 
 ### 1. Prerequisites
 
@@ -94,7 +179,7 @@ src/main/resources
 ### 2. Start MinIO via Docker Compose
 
 ```bash
-docker compose up -d
+docker compose up -d minio minio-init
 ```
 
 This project includes:
@@ -139,21 +224,27 @@ Run tests:
 mvnw.cmd test
 ```
 
-## Docker
+## Docker Image Only
 
-Build image:
+Build the Java image without Compose:
 
 ```bash
 docker build -t lms-backend .
 ```
 
-Run container:
+Run only the Java container against already-running dependencies:
 
 ```bash
-docker run --rm -p 8888:8888 --name lms-backend lms-backend
+docker run --rm -p 8888:8888 --name lms-backend \
+  -e SPRING_PROFILES_ACTIVE=docker \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/lms \
+  -e SPRING_DATASOURCE_USERNAME=lms \
+  -e SPRING_DATASOURCE_PASSWORD=lms_password \
+  -e MINIO_ENDPOINT=http://host.docker.internal:9000 \
+  lms-backend
 ```
 
-Note: when running in Docker, ensure DB/MinIO endpoints are reachable from the container and passed via environment variables.
+On Windows PowerShell, use backticks instead of backslashes for line continuation.
 
 ## API Documentation
 
