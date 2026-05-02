@@ -15,11 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupCreateRequest;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupStartRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupUpdateRequest;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.LessonSessionGenerateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupStartResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.LessonSessionResponse;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.GroupService;
+import uz.mirmaxsudov.lmsbackend.service.base.lms.LessonSessionService;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +34,7 @@ import java.util.UUID;
 @RequestMapping(APIUtil.API_BASE_URL + "groups")
 public class GroupController {
     private final GroupService groupService;
+    private final LessonSessionService lessonSessionService;
 
     @GetMapping
     public ResponseEntity<ApiPaginateResponse<List<GroupResponse>>> getAll(
@@ -61,6 +67,22 @@ public class GroupController {
             @RequestBody @Valid GroupUpdateRequest request
     ) {
         return groupService.updateGroup(id, request);
+    }
+
+    @PostMapping("/{id}/start")
+    public ResponseEntity<ApiResponse<GroupStartResponse>> start(
+            @PathVariable UUID id,
+            @RequestBody @Valid GroupStartRequest request
+    ) {
+        return groupService.startGroup(id, request);
+    }
+
+    @PostMapping("/{id}/lesson-sessions/generate")
+    public ResponseEntity<ApiResponse<List<LessonSessionResponse>>> generateLessonSessions(
+            @PathVariable UUID id,
+            @RequestBody @Valid LessonSessionGenerateRequest request
+    ) {
+        return lessonSessionService.generateForGroup(id, request);
     }
 
     @DeleteMapping("/{id}")

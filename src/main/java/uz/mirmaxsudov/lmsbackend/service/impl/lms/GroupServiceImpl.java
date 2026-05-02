@@ -5,32 +5,42 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.GroupMapper;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.ScheduleMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.TeacherMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Course;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group;
+import uz.mirmaxsudov.lmsbackend.model.entity.lms.Schedule;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupScheduleType;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupCreateRequest;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupScheduleRequest;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupStartRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupStartResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.ScheduleResponse;
 import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseRepository;
 import uz.mirmaxsudov.lmsbackend.repository.lms.group.GroupFilter;
 import uz.mirmaxsudov.lmsbackend.repository.lms.group.GroupRepository;
 import uz.mirmaxsudov.lmsbackend.repository.lms.group.GroupSpecification;
+import uz.mirmaxsudov.lmsbackend.repository.lms.schedule.ScheduleRepository;
 import uz.mirmaxsudov.lmsbackend.repository.user.TeacherProfileRepository;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.GroupService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,15 +50,18 @@ import java.util.UUID;
 public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository> implements GroupService {
     private final CourseRepository courseRepository;
     private final TeacherProfileRepository teacherProfileRepository;
+    private final ScheduleRepository scheduleRepository;
 
     public GroupServiceImpl(
             GroupRepository repository,
             CourseRepository courseRepository,
-            TeacherProfileRepository teacherProfileRepository
+            TeacherProfileRepository teacherProfileRepository,
+            ScheduleRepository scheduleRepository
     ) {
         super(repository);
         this.courseRepository = courseRepository;
         this.teacherProfileRepository = teacherProfileRepository;
+        this.scheduleRepository = scheduleRepository;
     }
 
     @Override
@@ -167,6 +180,43 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
     }
 
     @Override
+    @Transactional
+    public ResponseEntity<ApiResponse<GroupStartResponse>> startGroup(UUID id, GroupStartRequest request) {
+        Group group = findActiveGroup(id);
+
+        validateGroupCanStart(group);
+        validateGroupHasNoSchedules(group.getId());
+
+        Set<DayOfWeek> allowedDays = resolveAllowedDays(group);
+        validateStartSchedules(request.getSchedules(), allowedDays);
+
+        group.setStatus(GroupStatus.ACTIVE);
+        Group savedGroup = repository.save(group);
+
+        List<Schedule> schedules = request.getSchedules().stream()
+                .map(scheduleRequest -> Schedule.builder()
+                        .group(savedGroup)
+                        .dayOfWeek(scheduleRequest.getDayOfWeek())
+                        .startTime(scheduleRequest.getStartTime())
+                        .endTime(scheduleRequest.getEndTime())
+                        .build())
+                .toList();
+
+        List<ScheduleResponse> savedSchedules = scheduleRepository.saveAll(schedules).stream()
+                .map(ScheduleMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.<GroupStartResponse>builder()
+                .success(true)
+                .message("Group started successfully")
+                .data(GroupStartResponse.builder()
+                        .group(GroupMapper.toResponse(savedGroup))
+                        .schedules(savedSchedules)
+                        .build())
+                .build());
+    }
+
+    @Override
     public ResponseEntity<ApiResponse<Void>> deleteGroup(UUID id) {
         Group existingGroup = findActiveGroup(id);
 
@@ -257,5 +307,72 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
             throw new CustomBadRequestException("Schedule days must be empty unless schedule type is EXACT_DAYS");
 
         return normalizedDays;
+    }
+
+    private void validateGroupCanStart(Group group) {
+        if (group.getStatus() == GroupStatus.CANCELLED)
+            throw new CustomBadRequestException("Cancelled group cannot be started");
+
+        if (group.getStatus() == GroupStatus.FINISHED)
+            throw new CustomBadRequestException("Finished group cannot be started");
+    }
+
+    private void validateGroupHasNoSchedules(UUID groupId) {
+        if (scheduleRepository.existsByGroupIdAndDeletedFalse(groupId))
+            throw new CustomConflictException("Group already has schedules");
+    }
+
+    private Set<DayOfWeek> resolveAllowedDays(Group group) {
+        if (group.getScheduleType() == GroupScheduleType.EXACT_DAYS) {
+            if (group.getScheduleDays() == null || group.getScheduleDays().isEmpty())
+                throw new CustomBadRequestException("Group schedule days are required for EXACT_DAYS schedule type");
+
+            return new HashSet<>(group.getScheduleDays());
+        }
+
+        if (group.getScheduleType() == GroupScheduleType.ODD_DAYS)
+            return EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY);
+
+        if (group.getScheduleType() == GroupScheduleType.EVEN_DAYS)
+            return EnumSet.of(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY, DayOfWeek.SATURDAY);
+
+        throw new CustomBadRequestException("Group schedule type is required");
+    }
+
+    private void validateStartSchedules(List<GroupScheduleRequest> schedules, Set<DayOfWeek> allowedDays) {
+        if (schedules == null || schedules.isEmpty())
+            throw new CustomBadRequestException("At least one schedule is required");
+
+        Set<DayOfWeek> requestedDays = new HashSet<>();
+        for (GroupScheduleRequest schedule : schedules) {
+            validateScheduleRequest(schedule);
+
+            if (!requestedDays.add(schedule.getDayOfWeek()))
+                throw new CustomBadRequestException("Only one schedule can be provided per day");
+        }
+
+        if (!requestedDays.equals(allowedDays))
+            throw new CustomBadRequestException("Start schedules must exactly match the group's configured schedule days");
+    }
+
+    private void validateScheduleRequest(GroupScheduleRequest schedule) {
+        if (schedule == null)
+            throw new CustomBadRequestException("Schedule is required");
+
+        if (schedule.getDayOfWeek() == null)
+            throw new CustomBadRequestException("Day of week is required");
+
+        validateScheduleTimeRange(schedule.getStartTime(), schedule.getEndTime());
+    }
+
+    private void validateScheduleTimeRange(LocalTime startTime, LocalTime endTime) {
+        if (startTime == null)
+            throw new CustomBadRequestException("Start time is required");
+
+        if (endTime == null)
+            throw new CustomBadRequestException("End time is required");
+
+        if (!endTime.isAfter(startTime))
+            throw new CustomBadRequestException("Schedule end time must be after start time");
     }
 }
