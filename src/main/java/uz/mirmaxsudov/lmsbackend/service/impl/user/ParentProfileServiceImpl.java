@@ -5,10 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
-import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.ParentMapper;
-import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.ParentProfile;
@@ -74,13 +74,14 @@ public class ParentProfileServiceImpl extends BaseCRUDServiceImpl<ParentProfile,
     }
 
     @Override
-    public ResponseEntity<ApiResponse<ParentProfileResponse>> postParentProfile(ParentProfileRequest request, CustomUserDetails details) {
-        User user = userService.getById(request.getUserId())
-                .orElseThrow(() -> new CustomNotFoundException("User not found"));
-
-        if (repository.findByUserId(request.getUserId()).isPresent())
-            throw new CustomConflictException("Parent profile already exists for this user");
-
+    @Transactional
+    public ResponseEntity<ApiResponse<ParentProfileResponse>> postParentProfile(
+            ParentProfileRequest request,
+            MultipartFile profileImage,
+            MultipartFile profileBackgroundAttachment,
+            CustomUserDetails details
+    ) {
+        User user = userService.createUserEntity(request, profileImage, profileBackgroundAttachment, details);
         Set<StudentProfile> students = resolveStudents(request.getStudentIds());
 
         ParentProfile profile = ParentProfile.builder()
@@ -108,4 +109,3 @@ public class ParentProfileServiceImpl extends BaseCRUDServiceImpl<ParentProfile,
         return new HashSet<>(students);
     }
 }
-

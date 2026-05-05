@@ -1,26 +1,25 @@
 package uz.mirmaxsudov.lmsbackend.common.util.mappers;
 
+import uz.mirmaxsudov.lmsbackend.model.entity.lms.Course;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.CourseSection;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.CourseSectionResponse;
 
 import java.util.Collections;
 
 public final class CourseSectionMapper {
-
-    private CourseSectionMapper() {
-        // Private constructor to prevent instantiation
-    }
-
     public static CourseSectionResponse toResponse(CourseSection section) {
-        if (section == null) {
+        if (section == null)
             return null;
-        }
+
+
+        Course course = section.getCourse();
 
         CourseSectionResponse response = CourseSectionResponse.builder()
                 .id(section.getId())
                 .title(section.getTitle())
                 .orderIndex(section.getOrderIndex())
-                .courseId(section.getCourse() != null ? section.getCourse().getId() : null)
+                .courseId(course != null ? course.getId() : null)
+                .courseTitle(course != null ? course.getTitle() : null)
                 .build();
 
         if (section.getLessons() != null && !section.getLessons().isEmpty()) {

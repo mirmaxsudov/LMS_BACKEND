@@ -15,5 +15,6 @@ public class CourseSectionResponse {
     private String title;
     private Integer orderIndex;
     private UUID courseId;
+    private String courseTitle;
     private List<LessonResponse> lessons;
 }

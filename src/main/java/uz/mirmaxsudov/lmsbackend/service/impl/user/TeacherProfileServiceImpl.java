@@ -5,10 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
-import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.TeacherMapper;
-import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
@@ -25,7 +25,6 @@ import uz.mirmaxsudov.lmsbackend.service.base.user.TeacherProfileService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfile, TeacherProfileRepository> implements TeacherProfileService {
@@ -65,8 +64,14 @@ public class TeacherProfileServiceImpl extends BaseCRUDServiceImpl<TeacherProfil
     }
 
     @Override
-    public ResponseEntity<ApiResponse<TeacherProfileResponse>> postTeacherProfile(TeacherProfileRequest request, CustomUserDetails details) {
-        User user = userService.getById(request.getUserId()).orElseThrow(() -> new CustomNotFoundException("User not found"));
+    @Transactional
+    public ResponseEntity<ApiResponse<TeacherProfileResponse>> postTeacherProfile(
+            TeacherProfileRequest request,
+            MultipartFile profileImage,
+            MultipartFile profileBackgroundAttachment,
+            CustomUserDetails details
+    ) {
+        User user = userService.createUserEntity(request, profileImage, profileBackgroundAttachment, details);
 
         TeacherProfile newTeacherProfile = TeacherProfile.builder()
                 .user(user)

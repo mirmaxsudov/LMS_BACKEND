@@ -2,14 +2,17 @@ package uz.mirmaxsudov.lmsbackend.controller.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
 import uz.mirmaxsudov.lmsbackend.model.request.user.ParentProfileRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
@@ -35,11 +38,13 @@ public class ParentProfileController {
         return parentProfileService.getParentProfilePaginateResponse(page, size, search);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ParentProfileResponse>> postParentProfile(
-            @RequestBody @Valid ParentProfileRequest request,
+            @ModelAttribute @Valid ParentProfileRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "profileBackgroundAttachment", required = false) MultipartFile profileBackgroundAttachment,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        return parentProfileService.postParentProfile(request, details);
+        return parentProfileService.postParentProfile(request, profileImage, profileBackgroundAttachment, details);
     }
 }

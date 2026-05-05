@@ -8,8 +8,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class StudentProfileRequest {
-    private UUID userId;
+public class StudentProfileRequest extends UserCreateRequest {
     private UUID studentId;
-    private StudentStatus status;
+    private StudentStatus studentStatus;
 }

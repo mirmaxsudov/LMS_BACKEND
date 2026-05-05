@@ -2,9 +2,11 @@ package uz.mirmaxsudov.lmsbackend.controller.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
 import uz.mirmaxsudov.lmsbackend.model.request.user.TeacherProfileRequest;
@@ -32,11 +34,13 @@ public class TeacherProfileController {
         return teacherProfileService.getTeacherProfilePaginateResponse(page, size, search, position);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<TeacherProfileResponse>> postTeacherProfile(
-            @RequestBody @Valid TeacherProfileRequest request,
+            @ModelAttribute @Valid TeacherProfileRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "profileBackgroundAttachment", required = false) MultipartFile profileBackgroundAttachment,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        return teacherProfileService.postTeacherProfile(request, details);
+        return teacherProfileService.postTeacherProfile(request, profileImage, profileBackgroundAttachment, details);
     }
 }

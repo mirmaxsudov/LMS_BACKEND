@@ -15,4 +15,5 @@ public class LessonResponse {
     private String content;
     private Integer durationInMinutes;
     private UUID sectionId;
+    private String sectionTitle;
 }

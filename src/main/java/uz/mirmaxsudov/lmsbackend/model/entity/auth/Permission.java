@@ -26,7 +26,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(name = "permissions")
 public class Permission extends BaseEntity {
-
     @Column(nullable = false)
     private String code;
 

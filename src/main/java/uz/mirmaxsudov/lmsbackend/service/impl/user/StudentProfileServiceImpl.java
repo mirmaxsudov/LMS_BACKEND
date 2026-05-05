@@ -5,11 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
-import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.StudentMapper;
-import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
-import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.StudentStatus;
@@ -66,17 +65,18 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
     }
 
     @Override
-    public ResponseEntity<ApiResponse<StudentProfileResponse>> postStudentProfile(StudentProfileRequest request, CustomUserDetails details) {
-        User user = userService.getById(request.getUserId())
-                .orElseThrow(() -> new CustomNotFoundException("User not found"));
-
-        if (repository.findByUserId(request.getUserId()).isPresent())
-            throw new CustomConflictException("Student profile already exists for this user");
-
+    @Transactional
+    public ResponseEntity<ApiResponse<StudentProfileResponse>> postStudentProfile(
+            StudentProfileRequest request,
+            MultipartFile profileImage,
+            MultipartFile profileBackgroundAttachment,
+            CustomUserDetails details
+    ) {
+        User user = userService.createUserEntity(request, profileImage, profileBackgroundAttachment, details);
         StudentProfile profile = StudentProfile.builder()
                 .user(user)
                 .studentId(request.getStudentId())
-                .status(request.getStatus())
+                .status(request.getStudentStatus())
                 .build();
 
         repository.save(profile);
@@ -88,4 +88,3 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
                 .build());
     }
 }
-

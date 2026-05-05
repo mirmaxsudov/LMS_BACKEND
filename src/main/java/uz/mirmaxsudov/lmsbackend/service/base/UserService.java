@@ -34,6 +34,13 @@ public interface UserService {
 
     User saveOrUpdate(User user);
 
+    User createUserEntity(
+            @Valid UserCreateRequest request,
+            MultipartFile profileImage,
+            MultipartFile profileBackgroundAttachment,
+            CustomUserDetails details
+    );
+
     ResponseEntity<ApiResponse<AuthMe>> createUser(
             @Valid UserCreateRequest request,
             MultipartFile profileImage,

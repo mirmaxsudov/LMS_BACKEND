@@ -4,11 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
 
-import java.util.UUID;
-
 @Getter
 @Setter
-public class TeacherProfileRequest {
-    private UUID userId;
+public class TeacherProfileRequest extends UserCreateRequest {
     private TeacherPosition position;
 }

@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<AuthMe>> createUser(
+    public User createUserEntity(
             UserCreateRequest request,
             MultipartFile profileImage,
             MultipartFile profileBackgroundAttachment,
@@ -156,6 +156,18 @@ public class UserServiceImpl implements UserService {
                 attachmentService.delete(profileBackgroundImageAttachment.getId());
             throw exception;
         }
+
+        return savedUser;
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<AuthMe>> createUser(
+            UserCreateRequest request,
+            MultipartFile profileImage,
+            MultipartFile profileBackgroundAttachment,
+            CustomUserDetails details
+    ) {
+        User savedUser = createUserEntity(request, profileImage, profileBackgroundAttachment, details);
 
         return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
                 .success(true)

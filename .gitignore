@@ -38,3 +38,5 @@ build/
 /src/main/resources/bot.properties
 /src/main/resources/file.properties
 /src/main/resources/jwt.properties
+
+.m2
