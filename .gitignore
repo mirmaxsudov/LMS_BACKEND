@@ -40,3 +40,6 @@ build/
 /src/main/resources/jwt.properties
 
 .m2
+
+ai
+AGENTS.md
