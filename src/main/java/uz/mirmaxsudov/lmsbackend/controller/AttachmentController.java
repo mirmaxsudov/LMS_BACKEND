@@ -28,7 +28,7 @@ import java.util.UUID;
 public class AttachmentController {
     private final AttachmentService attachmentService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = "multipart/form-data", produces = "application/json")
     public ResponseEntity<ApiResponse<AttachmentResponse>> upload(
             @RequestPart("file") MultipartFile file,
             @RequestParam(required = false) AttachmentType type,
@@ -45,7 +45,7 @@ public class AttachmentController {
                 .build());
     }
 
-    @PostMapping(value = "/bulk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/bulk", consumes = "multipart/form-data", produces = "application/json")
     public ResponseEntity<ApiResponse<List<AttachmentResponse>>> uploadMany(
             @RequestPart("files") List<MultipartFile> files,
             @RequestParam(required = false) AttachmentType type,

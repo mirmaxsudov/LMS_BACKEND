@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -53,6 +54,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .collect(Collectors.joining(", "));
         return new ResponseEntity<>(new ApiErrorResponse("Constraint violation: " + message, HttpStatus.BAD_REQUEST, LocalDateTime.now(), 400), HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex,
+                                                                          @NonNull HttpHeaders headers,
+                                                                          @NonNull HttpStatusCode status,
+                                                                          @NonNull WebRequest request) {
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                "Uploaded file exceeds the maximum allowed multipart size",
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                LocalDateTime.now(),
+                413
+        );
+        return new ResponseEntity<>(errorResponse, headers, HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
     @ExceptionHandler(NullPointerException.class)
