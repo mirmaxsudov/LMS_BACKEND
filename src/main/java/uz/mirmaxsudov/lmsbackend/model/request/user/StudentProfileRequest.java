@@ -9,6 +9,5 @@ import java.util.UUID;
 @Getter
 @Setter
 public class StudentProfileRequest extends UserCreateRequest {
-    private UUID studentId;
     private StudentStatus studentStatus;
 }

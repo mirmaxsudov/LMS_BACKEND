@@ -25,6 +25,7 @@ import uz.mirmaxsudov.lmsbackend.service.base.user.StudentProfileService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfile, StudentProfileRepository> implements StudentProfileService {
@@ -75,7 +76,7 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
         User user = userService.createUserEntity(request, profileImage, profileBackgroundAttachment, details);
         StudentProfile profile = StudentProfile.builder()
                 .user(user)
-                .studentId(request.getStudentId())
+                .studentId(UUID.randomUUID())
                 .status(request.getStudentStatus())
                 .build();
 

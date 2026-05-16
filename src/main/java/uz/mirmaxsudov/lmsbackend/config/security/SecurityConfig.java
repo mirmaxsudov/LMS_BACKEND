@@ -3,6 +3,7 @@ package uz.mirmaxsudov.lmsbackend.config.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -50,7 +51,6 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/webjars/**",
             "/swagger-ui.html",
-            "/attachments/**",
     };
 
     @Bean
@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/google/**", "/oauth2/**").permitAll()
                         .requestMatchers(requestMatchers.toArray(new RequestMatcher[0])).permitAll()
                         .requestMatchers(WHITE_LIST_URL).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/attachments/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

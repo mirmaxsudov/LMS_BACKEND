@@ -52,16 +52,13 @@ src/main/java/uz/mirmaxsudov/lmsbackend
 
 src/main/resources
   |- application.yaml
-  |- application-dev.yml
   |- application-docker.yml
-  |- application-prod.yml
-  |- jwt.properties
   |- socket.properties
 ```
 
 ## Configuration
 
-`application.yaml` defines shared defaults, and `application-dev.yml` / `application-docker.yml` / `application-prod.yml` define environment-specific settings.
+`application.yaml` defines shared defaults, and `application-docker.yml` defines the Docker profile settings.
 
 ### Main properties used by this project
 
@@ -69,6 +66,8 @@ src/main/resources
   - `spring.profiles.active` (default: `dev`)
 - Server
   - `server.port` (default in profile files: `8888`)
+- Public app URL
+  - `APP_PUBLIC_BASE_URL` (default: `http://localhost:8888`)
 - PostgreSQL
   - `spring.datasource.url`
   - `spring.datasource.username`
@@ -189,7 +188,7 @@ This project includes:
 
 ### 3. Configure database/mail for your environment
 
-Update `src/main/resources/application-dev.yml` (or use env-based overrides) for:
+Use env-based overrides or local configuration for:
 
 - PostgreSQL connection
 - SMTP credentials
@@ -275,6 +274,7 @@ Base API prefix for REST modules: `/api/v1`
 - Attachments
   - `POST /api/v1/attachments`
   - `POST /api/v1/attachments/bulk`
+  - `GET /api/v1/attachments/{id}`
   - `DELETE /api/v1/attachments/{id}`
 - TUS uploads (`@OpenAuth` at controller level)
   - `OPTIONS /files` and `/files/{id}`

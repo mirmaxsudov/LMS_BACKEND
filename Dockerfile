@@ -1,21 +1,25 @@
-# syntax=docker/dockerfile:1
+FROM eclipse-temurin:21-jdk-alpine AS build
 
-FROM maven:3.9.9-eclipse-temurin-21 AS build
-WORKDIR /app
+WORKDIR /workspace
 
-COPY pom.xml ./
-RUN mvn -q -DskipTests dependency:go-offline
+COPY .mvn .mvn
+COPY mvnw pom.xml ./
+RUN chmod +x mvnw
+RUN ./mvnw -B -DskipTests dependency:go-offline
 
-COPY src ./src
-RUN mvn -q -DskipTests package
+COPY src src
+RUN ./mvnw -B -DskipTests package
 
 FROM eclipse-temurin:21-jre-alpine
+
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
-COPY --from=build /app/target/*.jar /app/app.jar
+RUN addgroup -S lms && adduser -S lms -G lms
 
-USER spring
+COPY --from=build /workspace/target/*.jar app.jar
+
+USER lms
+
 EXPOSE 8888
 
-ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

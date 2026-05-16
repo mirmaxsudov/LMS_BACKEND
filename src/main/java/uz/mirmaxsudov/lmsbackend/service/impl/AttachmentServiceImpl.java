@@ -1,15 +1,18 @@
 package uz.mirmaxsudov.lmsbackend.service.impl;
 
+import io.minio.StatObjectResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import uz.mirmaxsudov.lmsbackend.config.minio.MinioProperties;
+import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
 import uz.mirmaxsudov.lmsbackend.model.enums.content.AttachmentType;
+import uz.mirmaxsudov.lmsbackend.model.response.content.AttachmentDownload;
 import uz.mirmaxsudov.lmsbackend.model.response.content.AttachmentResponse;
 import uz.mirmaxsudov.lmsbackend.repository.content.AttachmentRepository;
 import uz.mirmaxsudov.lmsbackend.service.base.AttachmentService;
@@ -26,7 +29,9 @@ import java.util.UUID;
 public class AttachmentServiceImpl implements AttachmentService {
     private final AttachmentRepository attachmentRepository;
     private final StorageService storageService;
-    private final MinioProperties minioProperties;
+
+    @Value("${app.public-base-url:http://localhost:8888}")
+    private String publicBaseUrl;
 
     @Override
     @Transactional
@@ -38,7 +43,6 @@ public class AttachmentServiceImpl implements AttachmentService {
         String storedName = UUID.randomUUID() + (extension == null ? "" : "." + extension);
         String objectKey = "attachments/" + storedName;
         String contentType = normalizeContentType(file.getContentType());
-        AttachmentType resolvedType = type == null ? resolveType(contentType) : type;
 
         try (InputStream inputStream = file.getInputStream()) {
             storageService.uploadObject(objectKey, inputStream, file.getSize(), contentType, Map.of(
@@ -52,11 +56,13 @@ public class AttachmentServiceImpl implements AttachmentService {
                 .name(originalName)
                 .storedName(storedName)
                 .path(objectKey)
-                .url(buildObjectUrl(objectKey))
                 .extension(extension == null ? "bin" : extension)
                 .build();
 
-        return attachmentRepository.save(attachment);
+        Attachment savedAttachment = attachmentRepository.save(attachment);
+        savedAttachment.setUrl(buildAttachmentUrl(savedAttachment.getId()));
+
+        return savedAttachment;
     }
 
     @Override
@@ -84,9 +90,25 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
+    public AttachmentDownload download(UUID id) {
+        Attachment attachment = attachmentRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new CustomNotFoundException("Attachment not found with id: " + id));
+
+        StatObjectResponse stat = storageService.statObject(attachment.getPath());
+        String contentType = normalizeContentType(stat.contentType());
+
+        return new AttachmentDownload(
+                storageService.openObject(attachment.getPath(), 0, null),
+                stat.size(),
+                contentType,
+                attachment.getName()
+        );
+    }
+
+    @Override
     @Transactional
     public void delete(UUID id) {
-        Attachment attachment = attachmentRepository.findById(id)
+        Attachment attachment = attachmentRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CustomNotFoundException("Attachment not found with id: " + id));
 
         if (attachment.getPath() != null && !attachment.getPath().isBlank() && storageService.objectExists(attachment.getPath()))
@@ -136,10 +158,10 @@ public class AttachmentServiceImpl implements AttachmentService {
         return AttachmentType.FILE;
     }
 
-    private String buildObjectUrl(String objectKey) {
-        String endpoint = minioProperties.getEndpoint();
-        if (endpoint.endsWith("/"))
-            endpoint = endpoint.substring(0, endpoint.length() - 1);
-        return endpoint + "/" + minioProperties.getBucket() + "/" + objectKey;
+    private String buildAttachmentUrl(UUID id) {
+        String baseUrl = publicBaseUrl;
+        if (baseUrl.endsWith("/"))
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        return baseUrl + APIUtil.API_BASE_URL + "attachments/" + id;
     }
 }
