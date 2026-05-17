@@ -34,13 +34,16 @@ public class TeacherProfileController {
         return teacherProfileService.getTeacherProfilePaginateResponse(page, size, search, position);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = "multipart/form-data", produces = "application/json")
     public ResponseEntity<ApiResponse<TeacherProfileResponse>> postTeacherProfile(
             @ModelAttribute @Valid TeacherProfileRequest request,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @RequestPart(value = "profileBackgroundAttachment", required = false) MultipartFile profileBackgroundAttachment,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
+        System.out.println("request: " + request);
+        System.out.println(profileImage);
+        System.out.println(profileBackgroundAttachment);
         return teacherProfileService.postTeacherProfile(request, profileImage, profileBackgroundAttachment, details);
     }
 }

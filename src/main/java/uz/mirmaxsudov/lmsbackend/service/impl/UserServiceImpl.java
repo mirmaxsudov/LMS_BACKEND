@@ -119,7 +119,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByEmail(normalizedEmail).isPresent())
             throw new CustomConflictException("Email already exists: " + normalizedEmail);
 
-        Set<Role> roles = roleService.resolveRoles(request.getRoles());
         Attachment profileImageAttachment = null;
         Attachment profileBackgroundImageAttachment = null;
 
@@ -145,7 +144,6 @@ public class UserServiceImpl implements UserService {
                     .status(request.getStatus() == null ? UserStatus.ACTIVE : request.getStatus())
                     .profileImage(profileImageAttachment)
                     .profileBackgroundImage(profileBackgroundImageAttachment)
-                    .roles(roles)
                     .build();
 
             savedUser = userRepository.save(user);

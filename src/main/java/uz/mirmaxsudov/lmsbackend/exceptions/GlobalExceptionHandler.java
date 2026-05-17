@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiErrorResponse;
+import uz.mirmaxsudov.lmsbackend.storage.StorageException;
 
 import java.security.SignatureException;
 import java.time.LocalDateTime;
@@ -128,6 +129,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(CustomInternalErrorException.class)
     public ApiErrorResponse handleInternalErrorException(CustomInternalErrorException exception) {
         return new ApiErrorResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, LocalDateTime.now(), 500);
+    }
+
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    @ExceptionHandler(StorageException.class)
+    public ApiErrorResponse handleStorageException(StorageException exception) {
+        return new ApiErrorResponse(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE, LocalDateTime.now(), 503);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

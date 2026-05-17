@@ -52,8 +52,4 @@ public class UserCreateRequest {
 
     @NotNull(message = "Status is required")
     private UserStatus status = UserStatus.ACTIVE;
-
-    @Valid
-    @NotEmpty(message = "At least one role is required")
-    private List<RoleRequest> roles = new ArrayList<>();
 }

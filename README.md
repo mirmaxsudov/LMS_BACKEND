@@ -81,6 +81,9 @@ src/main/resources
 - TUS
   - `TUS_MAX_UPLOAD_SIZE_BYTES` (default: `10737418240` = 10 GiB)
   - `TUS_CHUNK_CLEANUP_ON_COMPLETE` (default: `true`)
+- Multipart upload limits
+  - `SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE` (default: `50MB`)
+  - `SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE` (default: `100MB`)
 
 ## Run Locally With Docker
 
