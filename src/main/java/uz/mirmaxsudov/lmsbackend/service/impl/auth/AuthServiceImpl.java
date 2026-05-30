@@ -4,12 +4,16 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMePatchMapper;
+import uz.mirmaxsudov.lmsbackend.config.security.CacheConfig;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
@@ -29,6 +33,7 @@ import uz.mirmaxsudov.lmsbackend.service.base.auth.AuthService;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -73,7 +78,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Cacheable(value = CacheConfig.AUTH_ME, key = "#details.user().id")
     public ResponseEntity<ApiResponse<AuthMe>> getMe(CustomUserDetails details) {
+        log.info("GET_ME METHOD EXECUTED for userId={}", details.user().getId());
+
         User user = details.user();
 
         Optional<Attachment> profileImage = attachmentService.getOptionalById(user.getProfileImage().getId());
@@ -87,6 +95,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @CacheEvict(
+            value = CacheConfig.AUTH_ME, key = "#details.user().id"
+    )
     public ResponseEntity<ApiResponse<AuthMe>> patchMe(
             AuthMeRequest request,
             MultipartFile profileImage,
