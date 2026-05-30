@@ -3,12 +3,19 @@ package uz.mirmaxsudov.lmsbackend.common.util.mappers;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
 import uz.mirmaxsudov.lmsbackend.model.response.auth.AuthMeRole;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class RoleMapper {
     public static Set<AuthMeRole> toResponses(Set<Role> roles) {
-        return roles.stream().map(RoleMapper::toResponse).collect(Collectors.toSet());
+        if (roles == null || roles.isEmpty())
+            return Collections.emptySet();
+
+        return roles.stream()
+                .filter(role -> role != null && !role.isDeleted())
+                .map(RoleMapper::toResponse)
+                .collect(Collectors.toSet());
     }
 
     public static AuthMeRole toResponse(Role role) {

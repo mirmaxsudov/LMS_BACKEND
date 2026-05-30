@@ -6,15 +6,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.SystemRole;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
+import uz.mirmaxsudov.lmsbackend.model.request.auth.UserRolesUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.user.UserCreateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.auth.AuthMe;
+import uz.mirmaxsudov.lmsbackend.model.response.auth.AuthMeRole;
 import uz.mirmaxsudov.lmsbackend.model.response.user.user.UserPreview;
 import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface UserService {
@@ -47,4 +50,12 @@ public interface UserService {
             MultipartFile profileBackgroundAttachment,
             CustomUserDetails details
     );
+
+    ResponseEntity<ApiResponse<Set<AuthMeRole>>> getUserRoles(UUID userId);
+
+    ResponseEntity<ApiResponse<AuthMe>> updateUserRoles(UUID userId, UserRolesUpdateRequest request);
+
+    ResponseEntity<ApiResponse<AuthMe>> addUserRole(UUID userId, UUID roleId);
+
+    ResponseEntity<ApiResponse<AuthMe>> removeUserRole(UUID userId, UUID roleId);
 }

@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<ApiResponse<JwtResponse>> login(LoginRequest request, HttpServletRequest servletRequest) {
-        var user = userService.getUserByEmail(request.getUsername())
+        var user = userService.getUserByEmailWithAuthorities(request.getUsername())
                 .orElseThrow(() -> new CustomNotFoundException("User not found with email: " + request.getUsername()));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))

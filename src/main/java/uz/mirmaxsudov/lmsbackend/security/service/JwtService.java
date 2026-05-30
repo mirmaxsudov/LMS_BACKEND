@@ -93,13 +93,16 @@ public class JwtService {
 
     private Set<String> extractRoles(User user) {
         return user.getRoles().stream()
+                .filter(role -> role != null && !role.isDeleted())
                 .map(Role::getName)
                 .collect(Collectors.toSet());
     }
 
     private Set<String> extractPermissions(User user) {
         return user.getRoles().stream()
+                .filter(role -> role != null && !role.isDeleted())
                 .flatMap(role -> role.getPermissions().stream())
+                .filter(permission -> permission != null && !permission.isDeleted())
                 .map(Permission::getCode)
                 .collect(Collectors.toSet());
     }

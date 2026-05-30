@@ -3,12 +3,12 @@ package uz.mirmaxsudov.lmsbackend.model.request.user;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import uz.mirmaxsudov.lmsbackend.annotations.validation.UniqueElements;
 import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 import uz.mirmaxsudov.lmsbackend.model.request.auth.RoleRequest;
@@ -52,4 +52,8 @@ public class UserCreateRequest {
 
     @NotNull(message = "Status is required")
     private UserStatus status = UserStatus.ACTIVE;
+
+    @Valid
+    @UniqueElements(property = "id", message = "Roles contain duplicate ids")
+    private List<RoleRequest> roles = new ArrayList<>();
 }
