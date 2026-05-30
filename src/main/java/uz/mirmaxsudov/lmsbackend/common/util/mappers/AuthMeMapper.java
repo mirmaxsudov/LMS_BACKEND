@@ -4,8 +4,6 @@ import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
 import uz.mirmaxsudov.lmsbackend.model.response.auth.AuthMe;
 
-import java.util.Optional;
-
 public final class AuthMeMapper {
     public static AuthMe toResponse(User user) {
         if (user == null)
@@ -31,7 +29,7 @@ public final class AuthMeMapper {
                 .profileBackgroundUrl(
                         user.getProfileBackgroundImage() == null ? null : user.getProfileBackgroundImage().getUrl()
                 )
-                .roles(user.getRoles())
+                .roles(RoleMapper.toResponses(user.getRoles()))
                 .build();
     }
 

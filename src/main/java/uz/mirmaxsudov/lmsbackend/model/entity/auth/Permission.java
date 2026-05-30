@@ -39,7 +39,6 @@ public class Permission extends BaseEntity {
     @Column(nullable = false)
     private PermissionCategory category;
 
-    @Column(nullable = false)
     private Boolean isSystem;
 
     @Builder.Default

@@ -27,5 +27,5 @@ public class AuthMe {
     private String profileImageUrl;
     private UUID profileBackgroundAttachmentId;
     private String profileBackgroundUrl;
-    private Set<Role> roles;
+    private Set<AuthMeRole> roles;
 }

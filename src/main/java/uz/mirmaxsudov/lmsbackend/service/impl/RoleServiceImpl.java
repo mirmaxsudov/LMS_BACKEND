@@ -12,6 +12,7 @@ import uz.mirmaxsudov.lmsbackend.service.base.RoleService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,5 +36,10 @@ public class RoleServiceImpl implements RoleService {
         }
 
         return roles;
+    }
+
+    @Override
+    public Set<Role> getAllByUser(UUID userId) {
+        return roleRepository.findAllWithPermissionByUserId(userId);
     }
 }

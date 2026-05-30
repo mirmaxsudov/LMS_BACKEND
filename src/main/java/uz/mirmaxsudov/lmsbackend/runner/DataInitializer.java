@@ -18,17 +18,15 @@
 //import java.util.Set;
 //
 //@Component
-//@RequiredArgsConstructor
 //@Transactional
+//@RequiredArgsConstructor
 //public class DataInitializer implements CommandLineRunner {
 //    private final PermissionRepository permissionRepository;
 //    private final RoleRepository roleRepository;
 //
 //    @Override
 //    public void run(String... args) {
-//
 //        Map<String, Permission> permissionMap = seedPermissions();
-//
 //        seedRoles(permissionMap);
 //    }
 //
@@ -43,6 +41,7 @@
 //                    .orElseGet(() -> {
 //                        Permission p = new Permission();
 //                        p.setCode(code);
+//                        p.setIsSystem(true);
 //                        p.setCategory(PermissionCategory.USER);
 //                        return permissionRepository.save(p);
 //                    });
