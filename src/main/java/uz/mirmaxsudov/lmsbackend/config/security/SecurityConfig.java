@@ -1,5 +1,6 @@
 package uz.mirmaxsudov.lmsbackend.config.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import tools.jackson.databind.ObjectMapper;
 import uz.mirmaxsudov.lmsbackend.security.CustomAccessDeniedHandler;
 import uz.mirmaxsudov.lmsbackend.security.CustomAuthenticationEntryPoint;
 import uz.mirmaxsudov.lmsbackend.security.JwtAuthenticationFilter;

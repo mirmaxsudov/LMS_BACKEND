@@ -1,7 +1,10 @@
 package uz.mirmaxsudov.lmsbackend.common.util.mappers;
 
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
+import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
 import uz.mirmaxsudov.lmsbackend.model.response.auth.AuthMe;
+
+import java.util.Optional;
 
 public final class AuthMeMapper {
     public static AuthMe toResponse(User user) {
@@ -30,5 +33,11 @@ public final class AuthMeMapper {
                 )
                 .roles(user.getRoles())
                 .build();
+    }
+
+    public static AuthMe toResponse(User user, Attachment profileImage, Attachment profileBackgroundImage) {
+        user.setProfileBackgroundImage(profileBackgroundImage);
+        user.setProfileImage(profileImage);
+        return toResponse(user);
     }
 }

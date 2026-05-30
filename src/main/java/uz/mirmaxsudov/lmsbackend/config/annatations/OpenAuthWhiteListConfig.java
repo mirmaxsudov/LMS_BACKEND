@@ -1,13 +1,15 @@
 package uz.mirmaxsudov.lmsbackend.config.annatations;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
@@ -20,19 +22,18 @@ import java.util.*;
 public class OpenAuthWhiteListConfig {
     @Bean
     public List<RequestMatcher> openAuthWhiteList(
-            RequestMappingHandlerMapping handlerMapping
+            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping handlerMapping,
+            HandlerMappingIntrospector introspector
     ) {
-
         List<RequestMatcher> matchers = new ArrayList<>();
 
-        PathPatternRequestMatcher.Builder builder =
-                PathPatternRequestMatcher.withDefaults();
+        MvcRequestMatcher.Builder builder =
+                new MvcRequestMatcher.Builder(introspector);
 
         Map<RequestMappingInfo, HandlerMethod> mp =
                 handlerMapping.getHandlerMethods();
 
         for (var entry : mp.entrySet()) {
-
             RequestMappingInfo info = entry.getKey();
             HandlerMethod handler = entry.getValue();
 
@@ -49,19 +50,14 @@ public class OpenAuthWhiteListConfig {
                     info.getPathPatternsCondition().getPatterns();
 
             for (PathPattern pp : patterns) {
-
                 String pattern = pp.getPatternString();
 
                 if (methods.isEmpty()) {
-
-                    matchers.add(builder.matcher(pattern));
-
+                    matchers.add(builder.pattern(pattern));
                 } else {
-
                     for (RequestMethod method : methods) {
-
                         matchers.add(
-                                builder.matcher(
+                                builder.pattern(
                                         HttpMethod.valueOf(method.name()),
                                         pattern
                                 )

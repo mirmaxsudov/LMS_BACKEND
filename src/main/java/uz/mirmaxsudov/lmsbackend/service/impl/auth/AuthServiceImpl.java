@@ -27,6 +27,8 @@ import uz.mirmaxsudov.lmsbackend.service.base.AttachmentService;
 import uz.mirmaxsudov.lmsbackend.service.base.UserService;
 import uz.mirmaxsudov.lmsbackend.service.base.auth.AuthService;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -73,10 +75,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<ApiResponse<AuthMe>> getMe(CustomUserDetails details) {
         User user = details.user();
+
+        Optional<Attachment> profileImage = attachmentService.getOptionalById(user.getProfileImage().getId());
+        Optional<Attachment> profileBackgroundImage = attachmentService.getOptionalById(user.getProfileBackgroundImage().getId());
+
         return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
                 .message("Get me successful")
                 .success(true)
-                .data(AuthMeMapper.toResponse(user))
+                .data(AuthMeMapper.toResponse(user, profileImage.orElse(null), profileBackgroundImage.orElse(null)))
                 .build());
     }
 
@@ -141,6 +147,7 @@ public class AuthServiceImpl implements AuthService {
         Attachment uploadedAttachment = attachmentService.upload(profileImage, AttachmentType.IMAGE, user);
 
         user.setProfileImage(uploadedAttachment);
+        userService.saveOrUpdate(user);
 
         if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
             attachmentService.delete(previousAttachment.getId());
@@ -154,6 +161,7 @@ public class AuthServiceImpl implements AuthService {
         Attachment uploadedAttachment = attachmentService.upload(profileBackgroundImage, AttachmentType.IMAGE, user);
 
         user.setProfileBackgroundImage(uploadedAttachment);
+        userService.saveOrUpdate(user);
 
         if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
             attachmentService.delete(previousAttachment.getId());

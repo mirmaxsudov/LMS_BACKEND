@@ -8,6 +8,7 @@ import uz.mirmaxsudov.lmsbackend.model.response.content.AttachmentDownload;
 import uz.mirmaxsudov.lmsbackend.model.response.content.AttachmentResponse;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AttachmentService {
@@ -20,4 +21,6 @@ public interface AttachmentService {
     AttachmentDownload download(UUID id);
 
     void delete(UUID id);
+
+    Optional<Attachment> getOptionalById(UUID id);
 }
