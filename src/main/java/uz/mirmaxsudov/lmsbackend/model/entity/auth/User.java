@@ -17,8 +17,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
+import uz.mirmaxsudov.lmsbackend.model.enums.Gender;
 import uz.mirmaxsudov.lmsbackend.model.enums.auth.UserStatus;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,6 +42,11 @@ public class User extends BaseEntity {
     private String middleName;
 
     private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private LocalDateTime birthDate;
 
     @Column(nullable = false, unique = true)
     private String email;

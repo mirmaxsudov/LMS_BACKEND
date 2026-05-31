@@ -22,6 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiErrorResponse;
 import uz.mirmaxsudov.lmsbackend.storage.StorageException;
+import uz.mirmaxsudov.lmsbackend.storage.StorageObjectNotFoundException;
 
 import java.security.SignatureException;
 import java.time.LocalDateTime;
@@ -135,6 +136,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(StorageException.class)
     public ApiErrorResponse handleStorageException(StorageException exception) {
         return new ApiErrorResponse(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE, LocalDateTime.now(), 503);
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(StorageObjectNotFoundException.class)
+    public ApiErrorResponse handleStorageObjectNotFoundException(StorageObjectNotFoundException exception) {
+        return new ApiErrorResponse(exception.getMessage(), HttpStatus.NOT_FOUND, LocalDateTime.now(), 404);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

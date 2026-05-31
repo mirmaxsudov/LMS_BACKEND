@@ -9,6 +9,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.request.auth.AuthMeRequest;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Mapper(componentModel = "spring")
 public interface AuthMePatchMapper {
     @Mapping(target = "email", source = "email", qualifiedByName = "trim")
@@ -17,6 +20,7 @@ public interface AuthMePatchMapper {
     @Mapping(target = "middleName", source = "middleName", qualifiedByName = "trimToNull")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "phoneNumber", source = "phoneNumber", qualifiedByName = "trimToNull")
+    @Mapping(target = "birthDate", source = "birthDate", qualifiedByName = "toStartOfDay")
     void patch(AuthMeRequest request, @MappingTarget User user);
 
     @Named("trim")
@@ -31,5 +35,10 @@ public interface AuthMePatchMapper {
 
         String trimmed = value.trim();
         return trimmed.isBlank() ? null : trimmed;
+    }
+
+    @Named("toStartOfDay")
+    default LocalDateTime toStartOfDay(LocalDate value) {
+        return value == null ? null : value.atStartOfDay();
     }
 }

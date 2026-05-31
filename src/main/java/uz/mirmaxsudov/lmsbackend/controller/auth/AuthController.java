@@ -46,9 +46,10 @@ public class AuthController {
     }
 
     @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse<AuthMe>> patchMe(
+    public ResponseEntity<ApiResponse<AuthMe>> patchMeJson(
             @RequestBody @Valid AuthMeRequest request,
-            @AuthenticationPrincipal CustomUserDetails details) {
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
         return authService.patchMe(request, null, null, details);
     }
 

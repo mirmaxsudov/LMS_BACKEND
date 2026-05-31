@@ -10,6 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMePatchMapper;
@@ -30,8 +31,6 @@ import uz.mirmaxsudov.lmsbackend.security.service.JwtService;
 import uz.mirmaxsudov.lmsbackend.service.base.AttachmentService;
 import uz.mirmaxsudov.lmsbackend.service.base.UserService;
 import uz.mirmaxsudov.lmsbackend.service.base.auth.AuthService;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -80,17 +79,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Cacheable(value = CacheConfig.AUTH_ME, key = "#details.user().id")
     public ResponseEntity<ApiResponse<AuthMe>> getMe(CustomUserDetails details) {
-        log.info("GET_ME METHOD EXECUTED for userId={}", details.user().getId());
-
         User user = details.user();
 
-        Optional<Attachment> profileImage = attachmentService.getOptionalById(user.getProfileImage().getId());
-        Optional<Attachment> profileBackgroundImage = attachmentService.getOptionalById(user.getProfileBackgroundImage().getId());
+        Attachment profileImage = resolveAttachment(user.getProfileImage());
+        Attachment profileBackgroundImage = resolveAttachment(user.getProfileBackgroundImage());
 
         return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
                 .message("Get me successful")
                 .success(true)
-                .data(AuthMeMapper.toResponse(user, profileImage.orElse(null), profileBackgroundImage.orElse(null)))
+                .data(AuthMeMapper.toResponse(user, profileImage, profileBackgroundImage))
                 .build());
     }
 
@@ -98,6 +95,7 @@ public class AuthServiceImpl implements AuthService {
     @CacheEvict(
             value = CacheConfig.AUTH_ME, key = "#details.user().id"
     )
+    @Transactional
     public ResponseEntity<ApiResponse<AuthMe>> patchMe(
             AuthMeRequest request,
             MultipartFile profileImage,
@@ -135,22 +133,28 @@ public class AuthServiceImpl implements AuthService {
             authMePatchMapper.patch(request, user);
         }
 
+        Attachment previousProfileImage = null;
+        Attachment previousProfileBackgroundImage = null;
+
         if (hasProfileImagePatch)
-            patchProfileImage(profileImage, user);
+            previousProfileImage = patchProfileImage(profileImage, user);
 
         if (hasProfileBackgroundPatch)
-            patchProfileBackgroundImage(profileBackgroundImage, user);
+            previousProfileBackgroundImage = patchProfileBackgroundImage(profileBackgroundImage, user);
 
-        userService.saveOrUpdate(user);
+        User savedUser = userService.saveOrUpdate(user);
+
+        deleteReplacedAttachment(previousProfileImage, savedUser.getProfileImage());
+        deleteReplacedAttachment(previousProfileBackgroundImage, savedUser.getProfileBackgroundImage());
 
         return ResponseEntity.ok(ApiResponse.<AuthMe>builder()
                 .message("Profile updated successfully")
                 .success(true)
-                .data(AuthMeMapper.toResponse(user))
+                .data(AuthMeMapper.toResponse(savedUser))
                 .build());
     }
 
-    private void patchProfileImage(MultipartFile profileImage, User user) {
+    protected Attachment patchProfileImage(MultipartFile profileImage, User user) {
         if (profileImage.isEmpty())
             throw new CustomBadRequestException("Profile image file must not be empty");
 
@@ -158,13 +162,10 @@ public class AuthServiceImpl implements AuthService {
         Attachment uploadedAttachment = attachmentService.upload(profileImage, AttachmentType.IMAGE, user);
 
         user.setProfileImage(uploadedAttachment);
-        userService.saveOrUpdate(user);
-
-        if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
-            attachmentService.delete(previousAttachment.getId());
+        return previousAttachment;
     }
 
-    private void patchProfileBackgroundImage(MultipartFile profileBackgroundImage, User user) {
+    protected Attachment patchProfileBackgroundImage(MultipartFile profileBackgroundImage, User user) {
         if (profileBackgroundImage.isEmpty())
             throw new CustomBadRequestException("Profile background image file must not be empty");
 
@@ -172,9 +173,20 @@ public class AuthServiceImpl implements AuthService {
         Attachment uploadedAttachment = attachmentService.upload(profileBackgroundImage, AttachmentType.IMAGE, user);
 
         user.setProfileBackgroundImage(uploadedAttachment);
-        userService.saveOrUpdate(user);
+        return previousAttachment;
+    }
 
-        if (previousAttachment != null && !previousAttachment.getId().equals(uploadedAttachment.getId()))
-            attachmentService.delete(previousAttachment.getId());
+    private Attachment resolveAttachment(Attachment attachment) {
+        if (attachment == null || attachment.getId() == null)
+            return null;
+        return attachmentService.getOptionalById(attachment.getId()).orElse(null);
+    }
+
+    private void deleteReplacedAttachment(Attachment previousAttachment, Attachment currentAttachment) {
+        if (previousAttachment == null || previousAttachment.getId() == null)
+            return;
+        if (currentAttachment != null && previousAttachment.getId().equals(currentAttachment.getId()))
+            return;
+        attachmentService.delete(previousAttachment.getId());
     }
 }

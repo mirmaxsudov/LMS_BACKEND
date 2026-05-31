@@ -16,6 +16,7 @@ public final class AuthMeMapper {
                 .middleName(user.getMiddleName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .gender(user.getGender())
                 .status(user.getStatus())
                 .profileImageAttachmentId(
                         user.getProfileImage() == null ? null : user.getProfileImage().getId()
@@ -30,12 +31,29 @@ public final class AuthMeMapper {
                         user.getProfileBackgroundImage() == null ? null : user.getProfileBackgroundImage().getUrl()
                 )
                 .roles(RoleMapper.toResponses(user.getRoles()))
+                .birthDate(user.getBirthDate())
                 .build();
     }
 
     public static AuthMe toResponse(User user, Attachment profileImage, Attachment profileBackgroundImage) {
-        user.setProfileBackgroundImage(profileBackgroundImage);
-        user.setProfileImage(profileImage);
-        return toResponse(user);
+        if (user == null)
+            return AuthMe.builder().build();
+
+        return AuthMe.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .middleName(user.getMiddleName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .gender(user.getGender())
+                .status(user.getStatus())
+                .profileImageAttachmentId(profileImage == null ? null : profileImage.getId())
+                .profileImageUrl(profileImage == null ? null : profileImage.getUrl())
+                .profileBackgroundAttachmentId(profileBackgroundImage == null ? null : profileBackgroundImage.getId())
+                .profileBackgroundUrl(profileBackgroundImage == null ? null : profileBackgroundImage.getUrl())
+                .roles(RoleMapper.toResponses(user.getRoles()))
+                .birthDate(user.getBirthDate())
+                .build();
     }
 }

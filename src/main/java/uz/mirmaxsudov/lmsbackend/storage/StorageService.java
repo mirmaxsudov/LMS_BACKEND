@@ -1,6 +1,7 @@
 package uz.mirmaxsudov.lmsbackend.storage;
 
 import io.minio.*;
+import io.minio.errors.ErrorResponseException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,7 @@ public class StorageService {
                 builder.userMetadata(metadata);
 
             minioClient.putObject(builder.build());
+            statObject(objectKey);
         } catch (Exception e) {
             throw new StorageException("Failed to upload object: " + objectKey, e);
         }
@@ -91,6 +93,8 @@ public class StorageService {
 
             return minioClient.getObject(builder.build());
         } catch (Exception e) {
+            if (isObjectNotFound(e))
+                throw new StorageObjectNotFoundException("Storage object not found: " + objectKey, e);
             throw new StorageException("Failed to read object: " + objectKey, e);
         }
     }
@@ -104,6 +108,8 @@ public class StorageService {
                             .build()
             );
         } catch (Exception e) {
+            if (isObjectNotFound(e))
+                throw new StorageObjectNotFoundException("Storage object not found: " + objectKey, e);
             throw new StorageException("Failed to stat object: " + objectKey, e);
         }
     }
@@ -117,6 +123,10 @@ public class StorageService {
                             .build()
             );
         } catch (Exception e) {
+            if (isObjectNotFound(e)) {
+                log.info("Storage object '{}' was already absent during delete", objectKey);
+                return;
+            }
             throw new StorageException("Failed to delete object: " + objectKey, e);
         }
     }
@@ -135,8 +145,18 @@ public class StorageService {
         try {
             statObject(objectKey);
             return true;
-        } catch (StorageException ex) {
+        } catch (StorageObjectNotFoundException ex) {
             return false;
+        } catch (StorageException ex) {
+            throw ex;
         }
+    }
+
+    private boolean isObjectNotFound(Exception exception) {
+        if (exception instanceof ErrorResponseException errorResponseException) {
+            String code = errorResponseException.errorResponse().code();
+            return "NoSuchKey".equals(code) || "NoSuchObject".equals(code);
+        }
+        return false;
     }
 }

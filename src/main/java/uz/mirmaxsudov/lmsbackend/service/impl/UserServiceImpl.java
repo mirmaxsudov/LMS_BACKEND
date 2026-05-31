@@ -153,6 +153,7 @@ public class UserServiceImpl implements UserService {
                     .lastName(request.getLastName().trim())
                     .middleName(request.getMiddleName() == null ? null : request.getMiddleName().trim())
                     .phoneNumber(request.getPhoneNumber().trim())
+                    .gender(request.getGender())
                     .email(normalizedEmail)
                     .password(passwordEncoder.encode(request.getPassword()))
                     .status(request.getStatus() == null ? UserStatus.ACTIVE : request.getStatus())
