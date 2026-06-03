@@ -32,7 +32,6 @@ import uz.mirmaxsudov.lmsbackend.service.base.AttachmentService;
 import uz.mirmaxsudov.lmsbackend.service.base.UserService;
 import uz.mirmaxsudov.lmsbackend.service.base.auth.AuthService;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
