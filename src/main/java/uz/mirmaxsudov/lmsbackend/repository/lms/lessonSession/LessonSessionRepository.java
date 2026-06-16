@@ -75,6 +75,29 @@ public interface LessonSessionRepository extends JpaRepository<LessonSession, UU
             @Param("from") LocalDateTime from
     );
 
+    @Query("""
+            select ls from LessonSession ls
+            join fetch ls.lesson l
+            join fetch ls.group g
+            join fetch g.course c
+            join fetch g.teacher t
+            join fetch t.user tu
+            left join fetch ls.room r
+            join g.students s
+            where s.id = :studentId
+              and s.deleted = false
+              and g.deleted = false
+              and ls.deleted = false
+              and ls.startTime >= :from
+              and ls.startTime < :to
+            order by ls.startTime asc
+            """)
+    List<LessonSession> findAllByStudentAndDateRange(
+            @Param("studentId") UUID studentId,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
     interface GroupSessionCount {
         UUID getGroupId();
 

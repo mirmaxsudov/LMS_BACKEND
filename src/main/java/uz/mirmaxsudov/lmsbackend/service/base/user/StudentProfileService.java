@@ -11,11 +11,13 @@ import uz.mirmaxsudov.lmsbackend.model.request.user.StudentProfileRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.StudentGroupResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.StudentWeekScheduleResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.StudyGroupsOverviewResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.user.user.StudentProfileResponse;
 import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
 import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,4 +43,10 @@ public interface StudentProfileService extends BaseCRUDService<StudentProfile> {
     );
 
     ResponseEntity<ApiResponse<StudyGroupsOverviewResponse>> getMyStudyGroupsOverview(CustomUserDetails details);
+
+    ResponseEntity<ApiResponse<StudentWeekScheduleResponse>> getMyWeekSchedule(
+            CustomUserDetails details,
+            LocalDate from,
+            LocalDate to
+    );
 }

@@ -16,6 +16,7 @@ import uz.mirmaxsudov.lmsbackend.model.entity.lms.Attendance;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Course;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.LessonSession;
+import uz.mirmaxsudov.lmsbackend.model.entity.lms.Room;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Schedule;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.AttendanceStatus;
@@ -29,7 +30,13 @@ import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupClassmateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.NextLessonResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.StudentGroupResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.NextClassResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.ScheduleClassResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.ScheduleDayResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.StudentWeekScheduleResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.StudyGroupsOverviewResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.WeekRangeResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.WeekSummaryResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.SyllabusProgressResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.user.user.StudentProfileResponse;
 import uz.mirmaxsudov.lmsbackend.repository.UserRepository;
@@ -49,9 +56,15 @@ import uz.mirmaxsudov.lmsbackend.service.base.user.StudentProfileService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -303,6 +316,161 @@ public class StudentProfileServiceImpl extends BaseCRUDServiceImpl<StudentProfil
                         .averageProgress(averageProgress)
                         .build())
                 .build());
+    }
+
+    private static final ZoneOffset UZB_OFFSET = ZoneOffset.of("+05:00");
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse<StudentWeekScheduleResponse>> getMyWeekSchedule(
+            CustomUserDetails details,
+            LocalDate from,
+            LocalDate to
+    ) {
+        StudentProfile studentProfile = repository.findByUserId(details.getId())
+                .orElseThrow(() -> new CustomNotFoundException("Student profile not found for current user"));
+
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.plusDays(1).atStartOfDay();
+
+        List<LessonSession> sessions = lessonSessionRepository.findAllByStudentAndDateRange(
+                studentProfile.getId(), fromDateTime, toDateTime
+        );
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+
+        Map<LocalDate, List<LessonSession>> sessionsByDate = sessions.stream()
+                .collect(Collectors.groupingBy(ls -> ls.getStartTime().toLocalDate()));
+
+        List<ScheduleDayResponse> days = new ArrayList<>();
+        LocalDate current = from;
+
+        while (!current.isAfter(to)) {
+            LocalDate date = current;
+            List<LessonSession> daySessions = sessionsByDate.getOrDefault(date, List.of());
+
+            List<ScheduleClassResponse> classes = daySessions.stream()
+                    .map(this::toScheduleClassResponse)
+                    .toList();
+
+            DayOfWeek dow = date.getDayOfWeek();
+            days.add(ScheduleDayResponse.builder()
+                    .id(date.toString())
+                    .date(date)
+                    .dayNumber(date.getDayOfMonth())
+                    .label(dow.getDisplayName(TextStyle.FULL, Locale.ENGLISH))
+                    .shortLabel(dow.getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
+                    .isToday(date.equals(today))
+                    .classes(classes)
+                    .build());
+
+            current = current.plusDays(1);
+        }
+
+        int totalClasses = sessions.size();
+        long totalMinutes = sessions.stream()
+                .mapToLong(ls -> Duration.between(ls.getStartTime(), ls.getEndTime()).toMinutes())
+                .sum();
+        long totalHours = totalMinutes / 60;
+
+        LessonSession nextSession = sessions.stream()
+                .filter(ls -> ls.getStatus() == LessonSessionStatus.PLANNED && ls.getStartTime().isAfter(now))
+                .findFirst()
+                .orElse(null);
+
+        NextClassResponse nextClass = null;
+        if (nextSession != null) {
+            LocalDate sessionDate = nextSession.getStartTime().toLocalDate();
+            String dayLabel;
+            if (sessionDate.equals(today))
+                dayLabel = "Today";
+            else if (sessionDate.equals(today.plusDays(1)))
+                dayLabel = "Tomorrow";
+            else {
+                dayLabel = sessionDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+                        + ", "
+                        + sessionDate.format(DateTimeFormatter.ofPattern("MMM d"));
+            }
+            nextClass = NextClassResponse.builder()
+                    .subject(nextSession.getGroup().getCourse().getTitle())
+                    .startTime(nextSession.getStartTime().atOffset(UZB_OFFSET))
+                    .dayLabel(dayLabel)
+                    .build();
+        }
+
+        WeekSummaryResponse summary = WeekSummaryResponse.builder()
+                .totalClasses(totalClasses)
+                .totalHours(totalHours)
+                .nextClass(nextClass)
+                .build();
+
+        WeekRangeResponse weekRange = WeekRangeResponse.builder()
+                .from(from)
+                .to(to)
+                .label(buildWeekRangeLabel(from, to))
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.<StudentWeekScheduleResponse>builder()
+                .success(true)
+                .message("Weekly schedule fetched successfully")
+                .data(StudentWeekScheduleResponse.builder()
+                        .weekRange(weekRange)
+                        .summary(summary)
+                        .days(days)
+                        .build())
+                .build());
+    }
+
+    private ScheduleClassResponse toScheduleClassResponse(LessonSession ls) {
+        Group group = ls.getGroup();
+        Room room = ls.getRoom();
+
+        String teacherName = null;
+        if (group.getTeacher() != null && group.getTeacher().getUser() != null) {
+            User teacherUser = group.getTeacher().getUser();
+            teacherName = teacherUser.getFirstName() + " " + teacherUser.getLastName();
+        }
+
+        String status = switch (ls.getStatus()) {
+            case DONE -> "COMPLETED";
+            case PLANNED -> "PLANNED";
+            case CANCELLED -> "CANCELLED";
+        };
+
+        return ScheduleClassResponse.builder()
+                .id(ls.getId())
+                .subject(group.getCourse() != null ? group.getCourse().getTitle() : null)
+                .topic(ls.getLesson().getTitle())
+                .teacherName(teacherName)
+                .roomName(room != null ? room.getName() : null)
+                .building(room != null ? room.getBuilding() : null)
+                .groupId(group.getId())
+                .groupName(group.getGroupName())
+                .startTime(ls.getStartTime().atOffset(UZB_OFFSET))
+                .endTime(ls.getEndTime().atOffset(UZB_OFFSET))
+                .status(status)
+                .build();
+    }
+
+    private String buildWeekRangeLabel(LocalDate from, LocalDate to) {
+        if (from.getYear() == to.getYear() && from.getMonth() == to.getMonth()) {
+            return from.format(DateTimeFormatter.ofPattern("MMM d"))
+                    + " – "
+                    + to.getDayOfMonth()
+                    + ", "
+                    + from.getYear();
+        } else if (from.getYear() == to.getYear()) {
+            return from.format(DateTimeFormatter.ofPattern("MMM d"))
+                    + " – "
+                    + to.format(DateTimeFormatter.ofPattern("MMM d"))
+                    + ", "
+                    + from.getYear();
+        } else {
+            return from.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
+                    + " – "
+                    + to.format(DateTimeFormatter.ofPattern("MMM d, yyyy"));
+        }
     }
 
     private int calculateAverageProgress(UUID studentId) {
