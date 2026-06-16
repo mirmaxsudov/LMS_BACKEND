@@ -2,8 +2,11 @@ package uz.mirmaxsudov.lmsbackend.repository.lms.lessonSession;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.LessonSession;
+import uz.mirmaxsudov.lmsbackend.model.enums.lms.LessonSessionStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,4 +29,55 @@ public interface LessonSessionRepository extends JpaRepository<LessonSession, UU
             LocalDateTime startTime,
             UUID id
     );
+
+    @Query("""
+            select count(ls) from LessonSession ls
+            join ls.group g
+            join g.students s
+            where s.id = :studentId
+              and s.deleted = false
+              and g.deleted = false
+              and ls.deleted = false
+              and ls.startTime >= :weekStart
+              and ls.startTime < :weekEnd
+            """)
+    long countByStudentIdAndStartTimeBetween(
+            @Param("studentId") UUID studentId,
+            @Param("weekStart") LocalDateTime weekStart,
+            @Param("weekEnd") LocalDateTime weekEnd
+    );
+
+    @Query("""
+            select ls.group.id as groupId, count(ls) as sessionCount
+            from LessonSession ls
+            where ls.group.id in :groupIds
+              and ls.status = :status
+              and ls.deleted = false
+            group by ls.group.id
+            """)
+    List<GroupSessionCount> countByGroupIdsAndStatus(
+            @Param("groupIds") List<UUID> groupIds,
+            @Param("status") LessonSessionStatus status
+    );
+
+    @Query("""
+            select ls from LessonSession ls
+            join fetch ls.lesson
+            where ls.group.id in :groupIds
+              and ls.status = :status
+              and ls.startTime >= :from
+              and ls.deleted = false
+            order by ls.startTime asc
+            """)
+    List<LessonSession> findUpcomingByGroupIdsAndStatus(
+            @Param("groupIds") List<UUID> groupIds,
+            @Param("status") LessonSessionStatus status,
+            @Param("from") LocalDateTime from
+    );
+
+    interface GroupSessionCount {
+        UUID getGroupId();
+
+        long getSessionCount();
+    }
 }

@@ -58,4 +58,6 @@ public interface UserService {
     ResponseEntity<ApiResponse<AuthMe>> addUserRole(UUID userId, UUID roleId);
 
     ResponseEntity<ApiResponse<AuthMe>> removeUserRole(UUID userId, UUID roleId);
+
+    int getTotalUsers();
 }

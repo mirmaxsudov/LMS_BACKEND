@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,4 +19,6 @@ public class GroupScheduleRequest {
 
     @NotNull(message = "End time is required")
     private LocalTime endTime;
+
+    private UUID roomId;
 }

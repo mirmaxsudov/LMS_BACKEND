@@ -22,15 +22,15 @@ import uz.mirmaxsudov.lmsbackend.model.enums.lms.EnrollmentStatus;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "enrollments",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "course_id"})
-)
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "enrollments",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "course_id"})
+)
 public class Enrollment extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

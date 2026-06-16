@@ -22,15 +22,15 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Entity
-@Table(
-        name = "schedules",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "day_of_week", "start_time", "end_time"})
-)
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "schedules",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "day_of_week", "start_time", "end_time"})
+)
 public class Schedule extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,6 +49,10 @@ public class Schedule extends BaseEntity {
     @NotNull
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
+
+    @JoinColumn(name = "room_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Room room;
 
     @AssertTrue(message = "Schedule end time must be after start time")
     private boolean isTimeRangeValid() {

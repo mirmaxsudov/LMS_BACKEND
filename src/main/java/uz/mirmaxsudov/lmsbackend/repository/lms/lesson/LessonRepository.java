@@ -24,4 +24,21 @@ public interface LessonRepository extends JpaRepository<Lesson, UUID>, JpaSpecif
             order by s.orderIndex asc, l.createdAt asc
             """)
     List<Lesson> findActiveByCourseIdOrderBySectionAndCreatedAt(@Param("courseId") UUID courseId);
+
+    @Query("""
+            select s.course.id as courseId, count(l) as lessonCount
+            from Lesson l
+            join l.section s
+            where s.course.id in :courseIds
+              and l.deleted = false
+              and s.deleted = false
+            group by s.course.id
+            """)
+    List<CourseLessonCount> countActiveByCourseIds(@Param("courseIds") List<UUID> courseIds);
+
+    interface CourseLessonCount {
+        UUID getCourseId();
+
+        long getLessonCount();
+    }
 }

@@ -1,6 +1,7 @@
 package uz.mirmaxsudov.lmsbackend.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,6 +14,7 @@ import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.AuthMeMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.RoleMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.UserMapper;
+import uz.mirmaxsudov.lmsbackend.config.security.CacheConfig;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
@@ -255,6 +257,12 @@ public class UserServiceImpl implements UserService {
                 .message("User role removed successfully")
                 .data(AuthMeMapper.toResponse(updatedUser))
                 .build());
+    }
+
+    @Override
+    @Cacheable(CacheConfig.TOTAL_USERS_COUNT)
+    public int getTotalUsers() {
+        return userRepository.findAllCount();
     }
 
     private User findActiveUserWithRoles(UUID userId) {

@@ -11,14 +11,13 @@ import lombok.Setter;
 import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 
 @Entity
-@Table(name = "attachments")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "attachments")
 public class Attachment extends BaseEntity {
-
     @Column(nullable = false)
     private String name;
 

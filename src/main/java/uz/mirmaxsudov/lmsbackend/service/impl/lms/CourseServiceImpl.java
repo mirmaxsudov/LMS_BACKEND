@@ -1,5 +1,6 @@
 package uz.mirmaxsudov.lmsbackend.service.impl.lms;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.CourseMapper;
+import uz.mirmaxsudov.lmsbackend.config.security.CacheConfig;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Course;
@@ -130,6 +132,12 @@ public class CourseServiceImpl extends BaseCRUDServiceImpl<Course, CourseReposit
                 .success(true)
                 .message("Course deleted successfully")
                 .build());
+    }
+
+    @Override
+    @Cacheable(CacheConfig.TOTAL_ACTIVE_COURSES)
+    public int getActiveCoursesCount() {
+        return repository.getCountOfActiveCourses();
     }
 
     private Course findActiveCourse(UUID id) {

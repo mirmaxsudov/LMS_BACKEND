@@ -14,6 +14,7 @@ import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Lesson;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.LessonSession;
+import uz.mirmaxsudov.lmsbackend.model.entity.lms.Room;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Schedule;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.LessonSessionStatus;
@@ -174,10 +175,12 @@ public class LessonSessionServiceImpl extends BaseCRUDServiceImpl<LessonSession,
         List<Schedule> schedules = scheduleRepository.findAllByGroupIdAndDeletedFalse(group.getId()).stream()
                 .sorted(Comparator.comparing(Schedule::getDayOfWeek).thenComparing(Schedule::getStartTime))
                 .toList();
+
         if (schedules.isEmpty())
             throw new CustomBadRequestException("Group has no schedules");
 
         List<Lesson> lessons = lessonRepository.findActiveByCourseIdOrderBySectionAndCreatedAt(group.getCourse().getId());
+
         if (lessons.isEmpty())
             throw new CustomBadRequestException("Group course has no lessons");
 
@@ -200,6 +203,7 @@ public class LessonSessionServiceImpl extends BaseCRUDServiceImpl<LessonSession,
             throw new CustomBadRequestException("No available schedule slots found in the selected date range");
 
         int count = Math.min(unscheduledLessons.size(), slots.size());
+
         List<LessonSession> generatedSessions = new java.util.ArrayList<>();
         for (int index = 0; index < count; index++) {
             Lesson lesson = unscheduledLessons.get(index);
@@ -210,6 +214,7 @@ public class LessonSessionServiceImpl extends BaseCRUDServiceImpl<LessonSession,
                     .lesson(lesson)
                     .startTime(slot.startTime())
                     .endTime(slot.endTime())
+                    .room(slot.room())
                     .status(LessonSessionStatus.PLANNED)
                     .build());
         }
@@ -319,7 +324,8 @@ public class LessonSessionServiceImpl extends BaseCRUDServiceImpl<LessonSession,
                 if (schedule.getDayOfWeek() == current.getDayOfWeek()) {
                     slots.add(new SessionSlot(
                             LocalDateTime.of(current, schedule.getStartTime()),
-                            LocalDateTime.of(current, schedule.getEndTime())
+                            LocalDateTime.of(current, schedule.getEndTime()),
+                            schedule.getRoom()
                     ));
                 }
             }
@@ -332,6 +338,6 @@ public class LessonSessionServiceImpl extends BaseCRUDServiceImpl<LessonSession,
                 .toList();
     }
 
-    private record SessionSlot(LocalDateTime startTime, LocalDateTime endTime) {
+    private record SessionSlot(LocalDateTime startTime, LocalDateTime endTime, Room room) {
     }
 }

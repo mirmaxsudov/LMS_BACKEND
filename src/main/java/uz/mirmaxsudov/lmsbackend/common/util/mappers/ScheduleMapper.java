@@ -20,6 +20,8 @@ public final class ScheduleMapper {
                 .dayOfWeek(schedule.getDayOfWeek())
                 .startTime(schedule.getStartTime())
                 .endTime(schedule.getEndTime())
+                .roomId(schedule.getRoom() == null ? null : schedule.getRoom().getId())
+                .roomName(schedule.getRoom() == null ? null : schedule.getRoom().getName())
                 .build();
     }
 }

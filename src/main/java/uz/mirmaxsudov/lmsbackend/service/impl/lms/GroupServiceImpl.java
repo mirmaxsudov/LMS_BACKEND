@@ -9,16 +9,20 @@ import org.springframework.transaction.annotation.Transactional;
 import uz.mirmaxsudov.lmsbackend.common.filter.PageableBuilder;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.GroupMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.ScheduleMapper;
+import uz.mirmaxsudov.lmsbackend.common.util.mappers.StudentMapper;
 import uz.mirmaxsudov.lmsbackend.common.util.mappers.TeacherMapper;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Course;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group;
+import uz.mirmaxsudov.lmsbackend.model.entity.lms.Room;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Schedule;
+import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.TeacherProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupScheduleType;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupAddStudentsRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupCreateRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupScheduleRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupStartRequest;
@@ -28,11 +32,14 @@ import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupStartResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.ScheduleResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.user.user.StudentProfileResponse;
 import uz.mirmaxsudov.lmsbackend.repository.lms.course.CourseRepository;
+import uz.mirmaxsudov.lmsbackend.repository.lms.room.RoomRepository;
 import uz.mirmaxsudov.lmsbackend.repository.lms.group.GroupFilter;
 import uz.mirmaxsudov.lmsbackend.repository.lms.group.GroupRepository;
 import uz.mirmaxsudov.lmsbackend.repository.lms.group.GroupSpecification;
 import uz.mirmaxsudov.lmsbackend.repository.lms.schedule.ScheduleRepository;
+import uz.mirmaxsudov.lmsbackend.repository.user.StudentProfileRepository;
 import uz.mirmaxsudov.lmsbackend.repository.user.TeacherProfileRepository;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.GroupService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
@@ -45,23 +52,30 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository> implements GroupService {
     private final CourseRepository courseRepository;
     private final TeacherProfileRepository teacherProfileRepository;
     private final ScheduleRepository scheduleRepository;
+    private final StudentProfileRepository studentProfileRepository;
+    private final RoomRepository roomRepository;
 
     public GroupServiceImpl(
             GroupRepository repository,
             CourseRepository courseRepository,
             TeacherProfileRepository teacherProfileRepository,
-            ScheduleRepository scheduleRepository
+            ScheduleRepository scheduleRepository,
+            StudentProfileRepository studentProfileRepository,
+            RoomRepository roomRepository
     ) {
         super(repository);
         this.courseRepository = courseRepository;
         this.teacherProfileRepository = teacherProfileRepository;
         this.scheduleRepository = scheduleRepository;
+        this.studentProfileRepository = studentProfileRepository;
+        this.roomRepository = roomRepository;
     }
 
     @Override
@@ -199,6 +213,7 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
                         .dayOfWeek(scheduleRequest.getDayOfWeek())
                         .startTime(scheduleRequest.getStartTime())
                         .endTime(scheduleRequest.getEndTime())
+                        .room(resolveRoom(scheduleRequest.getRoomId()))
                         .build())
                 .toList();
 
@@ -213,6 +228,57 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
                         .group(GroupMapper.toResponse(savedGroup))
                         .schedules(savedSchedules)
                         .build())
+                .build());
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ApiResponse<GroupResponse>> addStudents(UUID id, GroupAddStudentsRequest request) {
+        Group group = findActiveGroup(id);
+
+        validateGroupAcceptsStudents(group);
+
+        List<UUID> requestedStudentIds = request.getStudentIds().stream().distinct().toList();
+        List<StudentProfile> students = studentProfileRepository.findAllByStudentIdInAndDeletedFalse(requestedStudentIds);
+
+        validateStudentsFound(requestedStudentIds, students);
+
+        Set<UUID> currentStudentIds = group.getStudents() == null
+                ? Set.of()
+                : group.getStudents().stream().map(StudentProfile::getId).collect(Collectors.toSet());
+
+        List<StudentProfile> studentsToAdd = students.stream()
+                .filter(student -> !currentStudentIds.contains(student.getId()))
+                .toList();
+
+        validateCapacity(group.getCapacity(), currentStudentIds.size() + studentsToAdd.size());
+
+        studentsToAdd.forEach(student -> student.getGroups().add(group));
+        studentProfileRepository.saveAll(studentsToAdd);
+
+        GroupResponse response = GroupMapper.toResponse(group);
+        response.setCurrentStudents(currentStudentIds.size() + studentsToAdd.size());
+
+        return ResponseEntity.ok(ApiResponse.<GroupResponse>builder()
+                .success(true)
+                .message("Students added to group successfully")
+                .data(response)
+                .build());
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<List<StudentProfileResponse>>> getGroupStudents(UUID id) {
+        Group group = findActiveGroup(id);
+
+        List<StudentProfileResponse> students = studentProfileRepository.findAllByGroups_IdAndDeletedFalse(group.getId())
+                .stream()
+                .map(StudentMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.<List<StudentProfileResponse>>builder()
+                .success(true)
+                .message("Group students fetched successfully")
+                .data(students)
                 .build());
     }
 
@@ -233,6 +299,12 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
     private Course findCourse(UUID courseId) {
         return courseRepository.findByIdAndDeletedFalse(courseId)
                 .orElseThrow(() -> new CustomNotFoundException("Course not found with id: " + courseId));
+    }
+
+    private Room resolveRoom(UUID roomId) {
+        if (roomId == null) return null;
+        return roomRepository.findByIdAndDeletedFalse(roomId)
+                .orElseThrow(() -> new CustomNotFoundException("Room not found with id: " + roomId));
     }
 
     private TeacherProfile findTeacher(UUID teacherId) {
@@ -307,6 +379,26 @@ public class GroupServiceImpl extends BaseCRUDServiceImpl<Group, GroupRepository
             throw new CustomBadRequestException("Schedule days must be empty unless schedule type is EXACT_DAYS");
 
         return normalizedDays;
+    }
+
+    private void validateGroupAcceptsStudents(Group group) {
+        if (group.getStatus() == GroupStatus.CANCELLED)
+            throw new CustomBadRequestException("Cannot add students to a cancelled group");
+
+        if (group.getStatus() == GroupStatus.FINISHED)
+            throw new CustomBadRequestException("Cannot add students to a finished group");
+    }
+
+    private void validateStudentsFound(List<UUID> requestedStudentIds, List<StudentProfile> foundStudents) {
+        if (foundStudents.size() == requestedStudentIds.size())
+            return;
+
+        Set<UUID> foundIds = foundStudents.stream().map(StudentProfile::getId).collect(Collectors.toSet());
+        List<UUID> missingIds = requestedStudentIds.stream()
+                .filter(studentId -> !foundIds.contains(studentId))
+                .toList();
+
+        throw new CustomNotFoundException("Student profiles not found with ids: " + missingIds);
     }
 
     private void validateGroupCanStart(Group group) {

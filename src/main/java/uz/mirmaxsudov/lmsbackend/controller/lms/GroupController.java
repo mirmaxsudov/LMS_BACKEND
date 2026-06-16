@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uz.mirmaxsudov.lmsbackend.common.util.APIUtil;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupAddStudentsRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupCreateRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupStartRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.GroupUpdateRequest;
@@ -23,6 +25,7 @@ import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.GroupStartResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.LessonSessionResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.user.user.StudentProfileResponse;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.GroupService;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.LessonSessionService;
 
@@ -75,6 +78,19 @@ public class GroupController {
             @RequestBody @Valid GroupStartRequest request
     ) {
         return groupService.startGroup(id, request);
+    }
+
+    @PatchMapping("/{id}/students")
+    public ResponseEntity<ApiResponse<GroupResponse>> addStudents(
+            @PathVariable UUID id,
+            @RequestBody @Valid GroupAddStudentsRequest request
+    ) {
+        return groupService.addStudents(id, request);
+    }
+
+    @GetMapping("/{id}/students")
+    public ResponseEntity<ApiResponse<List<StudentProfileResponse>>> getStudents(@PathVariable UUID id) {
+        return groupService.getGroupStudents(id);
     }
 
     @PostMapping("/{id}/lesson-sessions/generate")

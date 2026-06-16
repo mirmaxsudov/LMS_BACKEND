@@ -17,6 +17,8 @@ public class LessonSessionResponse {
     private String groupName;
     private UUID lessonId;
     private String lessonTitle;
+    private UUID roomId;
+    private String roomName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LessonSessionStatus status;

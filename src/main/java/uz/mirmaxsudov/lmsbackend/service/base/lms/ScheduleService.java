@@ -3,6 +3,7 @@ package uz.mirmaxsudov.lmsbackend.service.base.lms;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Schedule;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.ScheduleAssignRoomRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.ScheduleCreateRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.ScheduleUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
@@ -27,6 +28,8 @@ public interface ScheduleService extends BaseCRUDService<Schedule> {
     ResponseEntity<ApiResponse<ScheduleResponse>> createSchedule(@Valid ScheduleCreateRequest request);
 
     ResponseEntity<ApiResponse<ScheduleResponse>> updateSchedule(UUID id, @Valid ScheduleUpdateRequest request);
+
+    ResponseEntity<ApiResponse<ScheduleResponse>> assignRoom(UUID id, @Valid ScheduleAssignRoomRequest request);
 
     ResponseEntity<ApiResponse<Void>> deleteSchedule(UUID id);
 }

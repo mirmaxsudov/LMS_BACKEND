@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +16,10 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
     Optional<StudentProfile> findByUserId(UUID userId);
 
     Optional<StudentProfile> findByIdAndDeletedFalse(UUID id);
+
+    List<StudentProfile> findAllByStudentIdInAndDeletedFalse(List<UUID> ids);
+
+    List<StudentProfile> findAllByGroups_IdAndDeletedFalse(UUID groupId);
 
     @Query("""
             select count(s) > 0 from StudentProfile s
@@ -25,4 +30,15 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
               and g.deleted = false
             """)
     boolean existsActiveStudentInGroup(@Param("studentId") UUID studentId, @Param("groupId") UUID groupId);
+
+    @Query("""
+            select count(distinct sp) from StudentProfile sp
+            join sp.groups g
+            join g.students s
+            where s.id = :studentId
+              and sp.id <> :studentId
+              and sp.deleted = false
+              and g.deleted = false
+            """)
+    long countClassmates(@Param("studentId") UUID studentId);
 }

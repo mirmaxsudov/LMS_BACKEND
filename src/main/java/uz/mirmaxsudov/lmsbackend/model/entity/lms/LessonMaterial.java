@@ -16,15 +16,15 @@ import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 import uz.mirmaxsudov.lmsbackend.model.entity.content.Attachment;
 
 @Entity
-@Table(
-        name = "lesson_materials",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"lesson_id", "attachment_id"})
-)
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "lesson_materials",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"lesson_id", "attachment_id"})
+)
 public class LessonMaterial extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

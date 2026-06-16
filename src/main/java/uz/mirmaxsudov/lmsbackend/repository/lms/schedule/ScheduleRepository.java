@@ -17,6 +17,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID>, JpaSp
 
     List<Schedule> findAllByGroupIdAndDeletedFalse(UUID groupId);
 
+    List<Schedule> findAllByGroupIdInAndDeletedFalse(List<UUID> groupIds);
+
     boolean existsByGroupIdAndDeletedFalse(UUID groupId);
 
     boolean existsByGroupIdAndDayOfWeekAndStartTimeAndEndTimeAndDeletedFalse(

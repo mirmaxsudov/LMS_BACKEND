@@ -9,7 +9,6 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import uz.mirmaxsudov.lmsbackend.filter.RateLimitFilter;
 import uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig.RateLimitInterceptor;
 
 @Configuration
@@ -17,7 +16,6 @@ import uz.mirmaxsudov.lmsbackend.config.rateLimiterConfig.RateLimitInterceptor;
 public class WebConfig implements WebMvcConfigurer {
 
     private final RateLimitInterceptor rateLimitInterceptor;
-    private final RateLimitFilter rateLimitFilter;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -39,12 +37,12 @@ public class WebConfig implements WebMvcConfigurer {
         return filterRegBean;
     }
 
-    @Bean
-    public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration() {
-        FilterRegistrationBean<RateLimitFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(rateLimitFilter);
-        registrationBean.addUrlPatterns("/*");
-        registrationBean.setOrder(Ordered.LOWEST_PRECEDENCE);
-        return registrationBean;
-    }
+//    @Bean
+//    public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration() {
+//        FilterRegistrationBean<RateLimitFilter> registrationBean = new FilterRegistrationBean<>();
+//        registrationBean.setFilter(rateLimitFilter);
+//        registrationBean.addUrlPatterns("/*");
+//        registrationBean.setOrder(Ordered.LOWEST_PRECEDENCE);
+//        return registrationBean;
+//    }
 }

@@ -25,12 +25,12 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "student_profiles")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "student_profiles")
 public class StudentProfile extends BaseEntity {
     @Column(nullable = false)
     private UUID studentId;

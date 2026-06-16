@@ -45,4 +45,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
               and upper(r.name) = upper(:roleName)
             """)
     long countActiveUsersByRoleName(@Param("roleName") String roleName);
+
+    @Query("select count(1) from User u")
+    int findAllCount();
 }

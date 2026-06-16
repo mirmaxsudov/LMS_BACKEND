@@ -46,3 +46,6 @@ AGENTS.md
 /src/main/resources/application-docker.yml
 /src/main/resources/file.properties
 /src/main/resources/socket.properties
+
+/src/main/images
+docs

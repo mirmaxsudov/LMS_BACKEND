@@ -22,15 +22,15 @@ import uz.mirmaxsudov.lmsbackend.model.enums.lms.LessonSessionStatus;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "lesson_sessions",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "lesson_id", "start_time"})
-)
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "lesson_sessions",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "lesson_id", "start_time"})
+)
 public class LessonSession extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -54,6 +54,10 @@ public class LessonSession extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LessonSessionStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     @AssertTrue(message = "Lesson session end time must be after start time")
     private boolean isTimeRangeValid() {

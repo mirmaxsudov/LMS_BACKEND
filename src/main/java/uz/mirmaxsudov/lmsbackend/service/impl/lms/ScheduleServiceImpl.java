@@ -11,15 +11,19 @@ import uz.mirmaxsudov.lmsbackend.exceptions.CustomBadRequestException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomConflictException;
 import uz.mirmaxsudov.lmsbackend.exceptions.CustomNotFoundException;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group;
+import uz.mirmaxsudov.lmsbackend.model.entity.lms.Room;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Schedule;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupScheduleType;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
+import uz.mirmaxsudov.lmsbackend.model.enums.lms.RoomStatus;
+import uz.mirmaxsudov.lmsbackend.model.request.lms.ScheduleAssignRoomRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.ScheduleCreateRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.ScheduleUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.ScheduleResponse;
 import uz.mirmaxsudov.lmsbackend.repository.lms.group.GroupRepository;
+import uz.mirmaxsudov.lmsbackend.repository.lms.room.RoomRepository;
 import uz.mirmaxsudov.lmsbackend.repository.lms.schedule.ScheduleFilter;
 import uz.mirmaxsudov.lmsbackend.repository.lms.schedule.ScheduleRepository;
 import uz.mirmaxsudov.lmsbackend.repository.lms.schedule.ScheduleSpecification;
@@ -37,10 +41,16 @@ import java.util.UUID;
 @Service
 public class ScheduleServiceImpl extends BaseCRUDServiceImpl<Schedule, ScheduleRepository> implements ScheduleService {
     private final GroupRepository groupRepository;
+    private final RoomRepository roomRepository;
 
-    public ScheduleServiceImpl(ScheduleRepository repository, GroupRepository groupRepository) {
+    public ScheduleServiceImpl(
+            ScheduleRepository repository,
+            GroupRepository groupRepository,
+            RoomRepository roomRepository
+    ) {
         super(repository);
         this.groupRepository = groupRepository;
+        this.roomRepository = roomRepository;
     }
 
     @Override
@@ -94,11 +104,14 @@ public class ScheduleServiceImpl extends BaseCRUDServiceImpl<Schedule, ScheduleR
         validateTimeRange(request.getStartTime(), request.getEndTime());
         validateDuplicate(group.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), null);
 
+        Room room = resolveRoom(request.getRoomId());
+
         Schedule schedule = Schedule.builder()
                 .group(group)
                 .dayOfWeek(request.getDayOfWeek())
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
+                .room(room)
                 .build();
 
         Schedule savedSchedule = repository.save(schedule);
@@ -120,10 +133,13 @@ public class ScheduleServiceImpl extends BaseCRUDServiceImpl<Schedule, ScheduleR
         validateTimeRange(request.getStartTime(), request.getEndTime());
         validateDuplicate(group.getId(), request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), id);
 
+        Room room = resolveRoom(request.getRoomId());
+
         existingSchedule.setGroup(group);
         existingSchedule.setDayOfWeek(request.getDayOfWeek());
         existingSchedule.setStartTime(request.getStartTime());
         existingSchedule.setEndTime(request.getEndTime());
+        existingSchedule.setRoom(room);
 
         Schedule updatedSchedule = repository.save(existingSchedule);
 
@@ -131,6 +147,23 @@ public class ScheduleServiceImpl extends BaseCRUDServiceImpl<Schedule, ScheduleR
                 .success(true)
                 .message("Schedule updated successfully")
                 .data(ScheduleMapper.toResponse(updatedSchedule))
+                .build());
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<ScheduleResponse>> assignRoom(UUID id, ScheduleAssignRoomRequest request) {
+        Schedule schedule = findActiveSchedule(id);
+
+        Room room = resolveRoom(request.getRoomId());
+        validateRoomAvailable(room);
+
+        schedule.setRoom(room);
+        Schedule updated = repository.save(schedule);
+
+        return ResponseEntity.ok(ApiResponse.<ScheduleResponse>builder()
+                .success(true)
+                .message(room == null ? "Room cleared from schedule" : "Room assigned to schedule successfully")
+                .data(ScheduleMapper.toResponse(updated))
                 .build());
     }
 
@@ -158,6 +191,17 @@ public class ScheduleServiceImpl extends BaseCRUDServiceImpl<Schedule, ScheduleR
                 .orElseThrow(() -> new CustomNotFoundException("Group not found with id: " + groupId));
     }
 
+    private Room resolveRoom(UUID roomId) {
+        if (roomId == null) return null;
+        return roomRepository.findByIdAndDeletedFalse(roomId)
+                .orElseThrow(() -> new CustomNotFoundException("Room not found with id: " + roomId));
+    }
+
+    private void validateRoomAvailable(Room room) {
+        if (room != null && room.getStatus() != RoomStatus.ACTIVE)
+            throw new CustomBadRequestException("Room '" + room.getName() + "' is not available (status: " + room.getStatus() + ")");
+    }
+
     private void validateGroupCanReceiveSchedule(Group group) {
         if (group.getStatus() != GroupStatus.ACTIVE)
             throw new CustomBadRequestException("Schedule can be created only for active groups");
@@ -168,6 +212,7 @@ public class ScheduleServiceImpl extends BaseCRUDServiceImpl<Schedule, ScheduleR
             throw new CustomBadRequestException("Day of week is required");
 
         Set<DayOfWeek> allowedDays = resolveAllowedDays(group);
+
         if (!allowedDays.contains(dayOfWeek))
             throw new CustomBadRequestException("Schedule day is not allowed by the group's schedule configuration");
     }
@@ -209,18 +254,9 @@ public class ScheduleServiceImpl extends BaseCRUDServiceImpl<Schedule, ScheduleR
     ) {
         boolean exists = excludedScheduleId == null
                 ? repository.existsByGroupIdAndDayOfWeekAndStartTimeAndEndTimeAndDeletedFalse(
-                groupId,
-                dayOfWeek,
-                startTime,
-                endTime
-        )
+                groupId, dayOfWeek, startTime, endTime)
                 : repository.existsByGroupIdAndDayOfWeekAndStartTimeAndEndTimeAndIdNotAndDeletedFalse(
-                groupId,
-                dayOfWeek,
-                startTime,
-                endTime,
-                excludedScheduleId
-        );
+                groupId, dayOfWeek, startTime, endTime, excludedScheduleId);
 
         if (exists)
             throw new CustomConflictException("Schedule already exists for this group, day, and time range");

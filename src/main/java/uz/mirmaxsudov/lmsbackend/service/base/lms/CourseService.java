@@ -31,4 +31,6 @@ public interface CourseService extends BaseCRUDService<Course> {
     ResponseEntity<ApiResponse<CourseResponse>> updateCourse(UUID id, @Valid CourseUpdateRequest request);
 
     ResponseEntity<ApiResponse<Void>> deleteCourse(UUID id);
+
+    int getActiveCoursesCount();
 }

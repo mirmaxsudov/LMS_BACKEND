@@ -20,15 +20,15 @@ import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.AttendanceStatus;
 
 @Entity
-@Table(
-        name = "attendances",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "lesson_session_id"})
-)
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "attendances",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "lesson_session_id"})
+)
 public class Attendance extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

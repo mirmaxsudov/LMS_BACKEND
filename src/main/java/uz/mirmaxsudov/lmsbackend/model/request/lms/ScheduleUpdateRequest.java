@@ -22,4 +22,6 @@ public class ScheduleUpdateRequest {
 
     @NotNull(message = "End time is required")
     private LocalTime endTime;
+
+    private UUID roomId;
 }

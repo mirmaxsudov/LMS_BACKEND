@@ -1,8 +1,10 @@
 package uz.mirmaxsudov.lmsbackend.repository.lms.group;
 
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Group;
+import uz.mirmaxsudov.lmsbackend.model.entity.user.StudentProfile;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.GroupStatus;
 
 import java.util.ArrayList;
@@ -43,6 +45,44 @@ public class GroupSpecification {
                         cb.like(cb.lower(root.get("teacher").get("user").get("firstName")), pattern),
                         cb.like(cb.lower(root.get("teacher").get("user").get("lastName")), pattern),
                         cb.like(cb.lower(root.get("teacher").get("user").get("email")), pattern)
+                ));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<Group> filterForStudent(StudentGroupFilter filter) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("deleted"), Boolean.FALSE));
+
+            Join<Group, StudentProfile> studentsJoin = root.join("students");
+            predicates.add(cb.equal(studentsJoin.get("id"), filter.getStudentId()));
+            predicates.add(cb.equal(studentsJoin.get("deleted"), Boolean.FALSE));
+
+            if (filter.getCourseId() != null)
+                predicates.add(cb.equal(root.get("course").get("id"), filter.getCourseId()));
+
+            if (filter.getScheduleType() != null)
+                predicates.add(cb.equal(root.get("scheduleType"), filter.getScheduleType()));
+
+            if (filter.getStatus() != null)
+                predicates.add(cb.equal(root.get("status"), filter.getStatus()));
+            else if (filter.getActive() != null) {
+                if (filter.getActive())
+                    predicates.add(cb.equal(root.get("status"), GroupStatus.ACTIVE));
+                else
+                    predicates.add(cb.notEqual(root.get("status"), GroupStatus.ACTIVE));
+            }
+
+            if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
+                String pattern = "%" + filter.getSearch().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("groupName")), pattern),
+                        cb.like(cb.lower(root.get("course").get("title")), pattern),
+                        cb.like(cb.lower(root.get("teacher").get("user").get("firstName")), pattern),
+                        cb.like(cb.lower(root.get("teacher").get("user").get("lastName")), pattern)
                 ));
             }
 

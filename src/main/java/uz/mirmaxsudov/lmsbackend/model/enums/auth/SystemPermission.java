@@ -20,6 +20,12 @@ public enum SystemPermission {
     QUIZ_START,
     QUIZ_EVALUATE,
 
+    // ROOM
+    ROOM_CREATE,
+    ROOM_EDIT,
+    ROOM_DELETE,
+    ROOM_VIEW,
+
     // FILE
     FILE_UPLOAD,
     FILE_DELETE,

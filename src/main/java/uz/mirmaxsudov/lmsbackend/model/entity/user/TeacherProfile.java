@@ -17,12 +17,12 @@ import uz.mirmaxsudov.lmsbackend.model.entity.base.BaseEntity;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.TeacherPosition;
 
 @Entity
-@Table(name = "teacher_profiles")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "teacher_profiles")
 public class TeacherProfile extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TeacherPosition position;

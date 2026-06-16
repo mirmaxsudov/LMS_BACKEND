@@ -18,4 +18,6 @@ public class ScheduleResponse {
     private DayOfWeek dayOfWeek;
     private LocalTime startTime;
     private LocalTime endTime;
+    private UUID roomId;
+    private String roomName;
 }

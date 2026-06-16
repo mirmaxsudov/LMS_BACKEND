@@ -19,6 +19,8 @@ public final class LessonSessionMapper {
                 .groupName(lessonSession.getGroup() == null ? null : lessonSession.getGroup().getGroupName())
                 .lessonId(lessonSession.getLesson() == null ? null : lessonSession.getLesson().getId())
                 .lessonTitle(lessonSession.getLesson() == null ? null : lessonSession.getLesson().getTitle())
+                .roomId(lessonSession.getRoom() == null ? null : lessonSession.getRoom().getId())
+                .roomName(lessonSession.getRoom() == null ? null : lessonSession.getRoom().getName())
                 .startTime(lessonSession.getStartTime())
                 .endTime(lessonSession.getEndTime())
                 .status(lessonSession.getStatus())
