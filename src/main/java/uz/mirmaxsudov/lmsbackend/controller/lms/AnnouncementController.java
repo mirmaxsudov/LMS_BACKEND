@@ -24,6 +24,7 @@ import uz.mirmaxsudov.lmsbackend.model.request.lms.AnnouncementPinRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.AnnouncementUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.AnnouncementOverviewResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.AnnouncementResponse;
 import uz.mirmaxsudov.lmsbackend.security.service.CustomUserDetails;
 import uz.mirmaxsudov.lmsbackend.service.base.lms.AnnouncementService;
@@ -47,9 +48,15 @@ public class AnnouncementController {
             @RequestParam(value = "priority", required = false) AnnouncementPriority priority,
             @RequestParam(value = "audience", required = false) AnnouncementAudience audience,
             @RequestParam(value = "pinned", required = false) Boolean pinned,
-            @RequestParam(value = "authorId", required = false) UUID authorId
+            @RequestParam(value = "authorId", required = false) UUID authorId,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        return announcementService.getAll(page, size, search, status, priority, audience, pinned, authorId);
+        return announcementService.getAll(page, size, search, status, priority, audience, pinned, authorId, details.roles());
+    }
+
+    @GetMapping("/overview")
+    public ResponseEntity<ApiResponse<AnnouncementOverviewResponse>> getOverview() {
+        return announcementService.getOverview();
     }
 
     @GetMapping("/{id}")

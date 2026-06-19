@@ -22,6 +22,7 @@ import uz.mirmaxsudov.lmsbackend.model.request.lms.AnnouncementPinRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.AnnouncementUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.AnnouncementOverviewResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.AnnouncementResponse;
 import uz.mirmaxsudov.lmsbackend.repository.lms.announcement.AnnouncementFilter;
 import uz.mirmaxsudov.lmsbackend.repository.lms.announcement.AnnouncementRepository;
@@ -29,9 +30,14 @@ import uz.mirmaxsudov.lmsbackend.repository.lms.announcement.AnnouncementSpecifi
 import uz.mirmaxsudov.lmsbackend.service.base.lms.AnnouncementService;
 import uz.mirmaxsudov.lmsbackend.service.impl.BaseCRUDServiceImpl;
 
+import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
+import uz.mirmaxsudov.lmsbackend.model.enums.auth.SystemRole;
+
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -51,20 +57,28 @@ public class AnnouncementServiceImpl extends BaseCRUDServiceImpl<Announcement, A
             AnnouncementPriority priority,
             AnnouncementAudience audience,
             Boolean pinned,
-            UUID authorId
+            UUID authorId,
+            Set<Role> viewerRoles
     ) {
         int normalizedPage = Math.max(page - 1, 0);
         int normalizedSize = size <= 0 ? 10 : size;
 
         Pageable pageable = PageableBuilder.build(normalizedPage, normalizedSize);
 
+        boolean admin = isAdmin(viewerRoles);
+
+        // Non-admins only ever see published announcements targeted to their audience.
+        AnnouncementStatus effectiveStatus = admin ? status : AnnouncementStatus.PUBLISHED;
+        Set<AnnouncementAudience> viewerAudiences = admin ? null : resolveViewerAudiences(viewerRoles);
+
         Specification<Announcement> filter = AnnouncementSpecification.filter(AnnouncementFilter.builder()
                 .search(search)
-                .status(status)
+                .status(effectiveStatus)
                 .priority(priority)
                 .audience(audience)
                 .pinned(pinned)
                 .authorId(authorId)
+                .viewerAudiences(viewerAudiences)
                 .build());
 
         Page<Announcement> announcements = repository.findAll(filter, pageable);
@@ -80,6 +94,23 @@ public class AnnouncementServiceImpl extends BaseCRUDServiceImpl<Announcement, A
                 .page(announcements.getNumber() + 1)
                 .size(announcements.getSize())
                 .hasNext(announcements.hasNext())
+                .build());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse<AnnouncementOverviewResponse>> getOverview() {
+        AnnouncementOverviewResponse overview = AnnouncementOverviewResponse.builder()
+                .published(repository.countByStatusAndDeletedFalse(AnnouncementStatus.PUBLISHED))
+                .scheduled(repository.countByStatusAndDeletedFalse(AnnouncementStatus.SCHEDULED))
+                .pinned(repository.countByPinnedTrueAndDeletedFalse())
+                .totalReach(repository.sumViewCountByStatus(AnnouncementStatus.PUBLISHED))
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.<AnnouncementOverviewResponse>builder()
+                .success(true)
+                .message("Announcement overview fetched successfully")
+                .data(overview)
                 .build());
     }
 
@@ -226,6 +257,56 @@ public class AnnouncementServiceImpl extends BaseCRUDServiceImpl<Announcement, A
         repository.saveAll(due);
 
         return due.size();
+    }
+
+    private boolean isAdmin(Set<Role> viewerRoles) {
+        return hasAnyRole(viewerRoles, SystemRole.SUPER_ADMIN, SystemRole.ADMIN);
+    }
+
+    private Set<AnnouncementAudience> resolveViewerAudiences(Set<Role> viewerRoles) {
+        Set<AnnouncementAudience> audiences = EnumSet.of(AnnouncementAudience.ALL);
+
+        if (viewerRoles == null)
+            return audiences;
+
+        for (Role role : viewerRoles) {
+            SystemRole systemRole = parseSystemRole(role.getName());
+            if (systemRole == null)
+                continue;
+
+            switch (systemRole) {
+                case STUDENT -> audiences.add(AnnouncementAudience.STUDENTS);
+                case TEACHER, SUPPORT_TEACHER -> audiences.add(AnnouncementAudience.TEACHERS);
+                case PARENT, GUARDIAN -> audiences.add(AnnouncementAudience.PARENTS);
+                case ADMIN, SUPER_ADMIN, MAINTAINER -> audiences.add(AnnouncementAudience.ADMINS);
+            }
+        }
+
+        return audiences;
+    }
+
+    private boolean hasAnyRole(Set<Role> viewerRoles, SystemRole... target) {
+        if (viewerRoles == null)
+            return false;
+
+        Set<SystemRole> targets = EnumSet.noneOf(SystemRole.class);
+        for (SystemRole role : target)
+            targets.add(role);
+
+        return viewerRoles.stream()
+                .map(role -> parseSystemRole(role.getName()))
+                .anyMatch(targets::contains);
+    }
+
+    private SystemRole parseSystemRole(String name) {
+        if (name == null)
+            return null;
+
+        try {
+            return SystemRole.valueOf(name.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     private Announcement findActiveAnnouncement(UUID id) {

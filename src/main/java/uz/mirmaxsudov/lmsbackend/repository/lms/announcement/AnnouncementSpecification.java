@@ -29,6 +29,13 @@ public class AnnouncementSpecification {
             if (filter.getAudience() != null)
                 predicates.add(cb.isMember(filter.getAudience(), root.get("audiences")));
 
+            if (filter.getViewerAudiences() != null && !filter.getViewerAudiences().isEmpty()) {
+                List<Predicate> audiencePredicates = new ArrayList<>();
+                filter.getViewerAudiences().forEach(audience ->
+                        audiencePredicates.add(cb.isMember(audience, root.get("audiences"))));
+                predicates.add(cb.or(audiencePredicates.toArray(new Predicate[0])));
+            }
+
             if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
                 String pattern = "%" + filter.getSearch().toLowerCase() + "%";
                 predicates.add(cb.or(

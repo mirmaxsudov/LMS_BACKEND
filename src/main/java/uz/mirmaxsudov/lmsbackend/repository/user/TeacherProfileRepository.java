@@ -11,4 +11,6 @@ import java.util.UUID;
 @Repository
 public interface TeacherProfileRepository extends JpaRepository<TeacherProfile, UUID>, JpaSpecificationExecutor<TeacherProfile> {
     Optional<TeacherProfile> findByIdAndDeletedFalse(UUID id);
+
+    Optional<TeacherProfile> findByUserId(UUID userId);
 }

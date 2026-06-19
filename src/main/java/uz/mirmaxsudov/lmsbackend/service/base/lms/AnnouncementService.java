@@ -2,6 +2,7 @@ package uz.mirmaxsudov.lmsbackend.service.base.lms;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import uz.mirmaxsudov.lmsbackend.model.entity.auth.Role;
 import uz.mirmaxsudov.lmsbackend.model.entity.auth.User;
 import uz.mirmaxsudov.lmsbackend.model.entity.lms.Announcement;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.AnnouncementAudience;
@@ -13,10 +14,12 @@ import uz.mirmaxsudov.lmsbackend.model.request.lms.AnnouncementPinRequest;
 import uz.mirmaxsudov.lmsbackend.model.request.lms.AnnouncementUpdateRequest;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiPaginateResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.ApiResponse;
+import uz.mirmaxsudov.lmsbackend.model.response.lms.AnnouncementOverviewResponse;
 import uz.mirmaxsudov.lmsbackend.model.response.lms.AnnouncementResponse;
 import uz.mirmaxsudov.lmsbackend.service.base.BaseCRUDService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface AnnouncementService extends BaseCRUDService<Announcement> {
@@ -29,8 +32,11 @@ public interface AnnouncementService extends BaseCRUDService<Announcement> {
             AnnouncementPriority priority,
             AnnouncementAudience audience,
             Boolean pinned,
-            UUID authorId
+            UUID authorId,
+            Set<Role> viewerRoles
     );
+
+    ResponseEntity<ApiResponse<AnnouncementOverviewResponse>> getOverview();
 
     ResponseEntity<ApiResponse<AnnouncementResponse>> getByIdResponse(UUID id);
 
@@ -46,10 +52,5 @@ public interface AnnouncementService extends BaseCRUDService<Announcement> {
 
     ResponseEntity<ApiResponse<Void>> deleteAnnouncement(UUID id);
 
-    /**
-     * Publishes every SCHEDULED announcement whose {@code publishedAt} has reached the current time.
-     *
-     * @return the number of announcements that were published
-     */
     int publishDueScheduledAnnouncements();
 }
