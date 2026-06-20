@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 @Component
 public class SoftDeleteEventListener implements DeleteEventListener {
+
     @Override
     public void onDelete(DeleteEvent deleteEvent) {
         var entity = deleteEvent.getObject();

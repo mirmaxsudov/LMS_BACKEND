@@ -21,24 +21,21 @@ public class UniqueElementsValidator implements ConstraintValidator<UniqueElemen
 
     @Override
     public boolean isValid(Collection<?> value, ConstraintValidatorContext context) {
-        if (value == null || value.isEmpty())
-            return true;
+        if (value == null || value.isEmpty()) return true;
 
         Set<Object> seen = new HashSet<>();
+
         for (Object element : value) {
-            if (element == null)
-                continue;
+            if (element == null) continue;
 
             Object propValue = readProperty(element, propertyName);
             if (!seen.add(propValue)) {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(
-                                messageTemplate.replace("{property}", propertyName)
-                        )
-                        .addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(messageTemplate.replace("{property}", propertyName)).addConstraintViolation();
                 return false;
             }
         }
+
         return true;
     }
 
@@ -53,8 +50,7 @@ public class UniqueElementsValidator implements ConstraintValidator<UniqueElemen
             }
             return getter.invoke(bean);
         } catch (Exception e) {
-            throw new IllegalStateException(
-                    "Failed to read property `" + prop + "` on " + bean.getClass(), e);
+            throw new IllegalStateException("Failed to read property `" + prop + "` on " + bean.getClass(), e);
         }
     }
 }

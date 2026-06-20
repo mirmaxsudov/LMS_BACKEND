@@ -9,7 +9,8 @@ import java.util.HashSet;
 
 public final class AnnouncementMapper {
 
-    private AnnouncementMapper() {}
+    private AnnouncementMapper() {
+    }
 
     public static AnnouncementResponse toResponse(Announcement announcement) {
         if (announcement == null) return null;

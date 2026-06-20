@@ -13,9 +13,8 @@ public final class AttendanceNoteMapper {
     }
 
     public static AttendanceNoteResponse toResponse(AttendanceNote attendanceNote) {
-        if (attendanceNote == null) {
+        if (attendanceNote == null)
             return null;
-        }
 
         Attendance attendance = attendanceNote.getAttendance();
         StudentProfile student = attendance == null ? null : attendance.getStudent();

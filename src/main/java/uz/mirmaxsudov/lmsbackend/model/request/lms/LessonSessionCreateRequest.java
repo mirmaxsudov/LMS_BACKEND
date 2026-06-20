@@ -1,8 +1,10 @@
+
 package uz.mirmaxsudov.lmsbackend.model.request.lms;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import uz.mirmaxsudov.lmsbackend.annotations.validation.StartBeforeEnd;
 import uz.mirmaxsudov.lmsbackend.model.enums.lms.LessonSessionStatus;
 
 import java.time.LocalDateTime;
@@ -10,6 +12,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@StartBeforeEnd(start = "startTime", end = "endTime", message = "Start time must be before end time")
 public class LessonSessionCreateRequest {
     @NotNull(message = "Group id is required")
     private UUID groupId;
